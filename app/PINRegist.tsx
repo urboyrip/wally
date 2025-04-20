@@ -30,17 +30,16 @@ const CreatePinScreen = () => {
   useEffect(() => {
     if (stage === 'reenter' && confirmPin.length === pinLength) {
       if (pin === confirmPin) {
-        // PIN cocok, simpan atau lanjutkan
+        
         console.log('PIN berhasil dibuat:', pin);
         if (Platform.OS !== 'web') {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }
         Alert.alert('Sukses', 'PIN berhasil dibuat!');
-        // Di sini kamu bisa navigasi ke halaman berikutnya atau menyimpan PIN
-        // router.push('/some-next-page');
+        
       } else {
         setErrorMessage('PIN tidak cocok. Silakan coba lagi.');
-        setConfirmPin(''); // Hanya mengosongkan confirmPin
+        setConfirmPin(''); 
         if (Platform.OS !== 'web') {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         }
@@ -99,9 +98,9 @@ const CreatePinScreen = () => {
       setStage('create');
       setErrorMessage('Create your PIN');
       setConfirmPin('');
-      setPin(''); // Optional: Clear the initially entered PIN as well
+      setPin('');
     } else {
-      router.back(); // Default behavior: go to the previous screen
+      router.back();
     }
   };
 
