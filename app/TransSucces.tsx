@@ -1,11 +1,10 @@
-import React, { useEffect } from "react"; // Import useEffect
+import React, { useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Image,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -46,22 +45,21 @@ const TransSuccessScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
+      <Ionicons name="checkmark-circle" size={64} color="green" />
         <Text style={styles.title}>Transfer Berhasil</Text>
-        <Ionicons name="checkmark-circle" size={64} color="green" />
-      </View>
-
-      <Text style={styles.timestamp}>Waktu Transaksi: {transactionTime}</Text>
-
-      <Text style={styles.label}>To</Text>
-      <View style={styles.card}>
-        <Text style={styles.name}>{recipientName || "-"}</Text>
-        <Text style={styles.account}>{accountNumber || "-"}</Text>
+        <Text style={styles.timestamp}>Waktu Transaksi: {transactionTime}</Text>
       </View>
 
       <Text style={styles.label}>From</Text>
       <View style={styles.card}>
         <Text style={styles.name}>{senderName || "-"}</Text>
         <Text style={styles.account}>{senderAccount || "-"}</Text>
+      </View>
+      
+      <Text style={styles.label}>To</Text>
+      <View style={styles.card}>
+        <Text style={styles.name}>{recipientName || "-"}</Text>
+        <Text style={styles.account}>{accountNumber || "-"}</Text>
       </View>
 
       <View style={styles.row}>
