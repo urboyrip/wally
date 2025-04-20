@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   View,
@@ -7,18 +6,19 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useTransfer } from "@/context/transferContext";
 
 const ConfirmationScreen = () => {
   const {
+    accountNumber,
+    amount,
+    note,
     recipientName,
-    recipientAccount,
     senderName,
     senderAccount,
-    note,
-    amount,
-  } = useLocalSearchParams();
+  } = useTransfer();
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -32,7 +32,7 @@ const ConfirmationScreen = () => {
       <Text style={styles.label}>Recipient</Text>
       <View style={styles.card}>
         <Text style={styles.name}>{recipientName}</Text>
-        <Text style={styles.account}>{recipientAccount}</Text>
+        <Text style={styles.account}>{accountNumber}</Text>
       </View>
 
       <Text style={styles.label}>Source of Fund</Text>
@@ -53,7 +53,22 @@ const ConfirmationScreen = () => {
         </Text>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/InputPIN")}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() =>
+          router.push({
+            pathname: "/InputPIN",
+            params: {
+              recipientAccount: accountNumber,
+              amount: amount,
+              note: note,
+              recipientName: recipientName,
+              senderName: senderName,
+              senderAccount: senderAccount,
+            },
+          })
+        }
+      >
         <Text style={styles.buttonText}>Confirm</Text>
       </TouchableOpacity>
     </ScrollView>

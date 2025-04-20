@@ -1,7 +1,14 @@
 import { Stack } from "expo-router";
+import { TransferProvider } from "@/context/transferContext";
 
 export default function RootLayout() {
-  return <Stack screenOptions={{
-    headerShown: false
-  }}/>;
+  return (
+    <TransferProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      />
+    </TransferProvider>
+  );
 }

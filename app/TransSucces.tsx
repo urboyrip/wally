@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useEffect } from "react"; // Import useEffect
 import {
   View,
   Text,
@@ -8,8 +7,9 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useTransfer } from "@/context/transferContext";
 
 const generateTransactionId = () => {
   const timestamp = Date.now();
@@ -26,17 +26,22 @@ const getCurrentDateTime = () => {
 
 const TransSuccessScreen = () => {
   const {
-      recipientName,
-      recipientAccount,
-      senderName,
-      senderAccount,
-      note,
-      amount,
-    } = useLocalSearchParams();
-  
+    accountNumber,
+    amount,
+    note,
+    recipientName,
+    senderName,
+    senderAccount,
+    resetTransferData,
+  } = useTransfer();
 
   const transactionId = generateTransactionId();
   const transactionTime = getCurrentDateTime();
+
+  const handleBackToHome = () => {
+    resetTransferData();
+    router.push("/");
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -50,7 +55,7 @@ const TransSuccessScreen = () => {
       <Text style={styles.label}>To</Text>
       <View style={styles.card}>
         <Text style={styles.name}>{recipientName || "-"}</Text>
-        <Text style={styles.account}>{recipientAccount || "-"}</Text>
+        <Text style={styles.account}>{accountNumber || "-"}</Text>
       </View>
 
       <Text style={styles.label}>From</Text>
@@ -78,7 +83,7 @@ const TransSuccessScreen = () => {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push("/")}
+        onPress={handleBackToHome}
       >
         <Text style={styles.buttonText}>Kembali ke Beranda</Text>
       </TouchableOpacity>

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   View,
@@ -13,11 +12,20 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTransfer } from "@/context/transferContext";
 
 const TransferScreen = () => {
-  const [accountNumber, setAccountNumber] = useState("");
-  const [amount, setAmount] = useState("");
-  const [note, setNote] = useState("");
+  const {
+    accountNumber,
+    setAccountNumber,
+    amount,
+    setAmount,
+    note,
+    setNote,
+    setRecipientName,
+    setSenderName,
+    setSenderAccount,
+  } = useTransfer();
   const [isEditingAmount, setIsEditingAmount] = useState(false);
 
   const formatRupiah = (value: string) => {
@@ -44,17 +52,12 @@ const TransferScreen = () => {
       return;
     }
 
-    router.push({
-      pathname: "/TransConfirmation",
-      params: {
-        recipientAccount: accountNumber,
-        amount: amount.replace(/\D/g, ""),
-        note,
-        recipientName: "Ahmad Jaelani",
-        senderName: "Sandy Yuyu",
-        senderAccount: "111888111888",
-      },
-    });
+    // Set data ke context sebelum navigasi
+    setRecipientName("Ahmad Jaelani"); // Data statis, bisa diganti dengan input
+    setSenderName("Sandy Yuyu");     // Data statis
+    setSenderAccount("111888111888"); // Data statis
+
+    router.push("/TransConfirmation");
   };
 
   return (
