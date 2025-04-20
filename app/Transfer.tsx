@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTransfer } from "@/context/transferContext";
 
-const WALLY_BALANCE = 1000000; // Definisikan saldo Wally
+const WALLY_BALANCE = 1000000;
 
 const TransferScreen = () => {
   const {
@@ -62,10 +62,10 @@ const TransferScreen = () => {
       return;
     }
 
-    // Set data ke context sebelum navigasi
-    setRecipientName("Ahmad Jaelani"); // Data statis, bisa diganti dengan input
-    setSenderName("Sandy Yuyu");     // Data statis
-    setSenderAccount("111888111888"); // Data statis
+    
+    setRecipientName("Ahmad Jaelani");
+    setSenderName("Sandy Yuyu");     
+    setSenderAccount("111888111888"); 
 
     router.push("/TransConfirmation");
   };
@@ -101,12 +101,12 @@ const TransferScreen = () => {
           </View>
         </View>
 
-        <Text style={styles.label}>Transfer Amount</Text>
         <TouchableOpacity
           style={styles.amountBox}
           onPress={() => setIsEditingAmount(true)}
           activeOpacity={1}
         >
+          <Text style={styles.label}>Transfer Amount</Text>
           {isEditingAmount ? (
             <TextInput
               autoFocus
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
     marginBottom: 8,
-    marginTop: 16,
+    marginTop: 0,
   },
   input: {
     borderBottomWidth: 1,
@@ -187,6 +187,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f3eaff",
     padding: 16,
     marginBottom: 8,
+    marginTop:16
   },
   amountText: {
     fontSize: 20,
@@ -199,6 +200,7 @@ const styles = StyleSheet.create({
   minNote: {
     fontSize: 12,
     color: "#888",
+    marginTop:10,
   },
   button: {
     backgroundColor: "#A020F0",

@@ -50,16 +50,16 @@ const TransSuccessScreen = () => {
         <Text style={styles.timestamp}>Waktu Transaksi: {transactionTime}</Text>
       </View>
 
-      <Text style={styles.label}>From</Text>
-      <View style={styles.card}>
-        <Text style={styles.name}>{senderName || "-"}</Text>
-        <Text style={styles.account}>{senderAccount || "-"}</Text>
-      </View>
-      
       <Text style={styles.label}>To</Text>
       <View style={styles.card}>
         <Text style={styles.name}>{recipientName || "-"}</Text>
         <Text style={styles.account}>{accountNumber || "-"}</Text>
+      </View>
+
+      <Text style={styles.label}>From</Text>
+      <View style={styles.card}>
+        <Text style={styles.name}>{senderName || "-"}</Text>
+        <Text style={styles.account}>{senderAccount || "-"}</Text>
       </View>
 
       <View style={styles.row}>
