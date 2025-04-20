@@ -2,22 +2,19 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router"
+import { useTopup } from "@/context/topupContext";
 
 const CreditCardConfirmationScreen = () => {
-  const { amount, cardNumber, expiry, cvv } = useLocalSearchParams<{
-    amount: string;
-    cardNumber: string;
-    expiry: string;
-    cvv: string;
-  }>();
+  const { amount, cardDetails } = useTopup();
+    const { cardNumber, expiry } = cardDetails;
 
   const handleConfirmTopup = () => {
     router.push({
-      pathname: "/TopUpCreditSuccess", // Ubah rute sukses
+      pathname: "/TopUpCreditSuccess",
       params: { amount: amount, cardNumber: cardNumber, expiry: expiry },
     });
-    console.log("Melakukan top up kartu kredit:", cardNumber, expiry, cvv, amount);
+    console.log("Melakukan top up kartu kredit:", cardNumber, expiry, amount);
   };
 
   return (

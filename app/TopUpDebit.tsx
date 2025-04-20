@@ -1,5 +1,5 @@
 // TopUpDebitScreen.tsx
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -12,32 +12,31 @@ import {
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
+import { useTopup } from "@/context/topupContext"; // Import hook context
 
 const TopUpDebitScreen = () => {
-  const { amount } = useLocalSearchParams<{ amount: string }>();
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
+  const { amount, setCardDetails } = useTopup(); // Gunakan context untuk amount dan card details
+  const [localCardNumber, setLocalCardNumber] = React.useState("");
+  const [localExpiry, setLocalExpiry] = React.useState("");
+  const [localCvv, setLocalCvv] = React.useState("");
 
   const handleNext = () => {
-    if (!cardNumber.trim() || cardNumber.length < 16) {
+    if (!localCardNumber.trim() || localCardNumber.length < 16) {
       Alert.alert("Peringatan", "Nomor kartu tidak valid.");
       return;
     }
-    if (!expiry.trim() || expiry.length !== 5 || !expiry.includes("/")) {
+    if (!localExpiry.trim() || localExpiry.length !== 5 || !localExpiry.includes("/")) {
       Alert.alert("Peringatan", "Format tanggal kedaluwarsa tidak valid (MM/YY).");
       return;
     }
-    if (!cvv.trim() || cvv.length < 3) {
+    if (!localCvv.trim() || localCvv.length < 3) {
       Alert.alert("Peringatan", "CVV tidak valid.");
       return;
     }
 
-    router.push({
-      pathname: "/TopUpDebitConfirm",
-      params: { amount: amount, cardNumber: cardNumber, expiry: expiry, cvv: cvv },
-    });
+    setCardDetails({ cardNumber: localCardNumber, expiry: localExpiry, cvv: localCvv });
+    router.push("/TopUpDebitConfirm");
   };
 
   return (
@@ -77,8 +76,8 @@ const TopUpDebitScreen = () => {
         <Text style={styles.inputLabel}>Card Number</Text>
         <TextInput
           style={styles.input}
-          value={cardNumber}
-          onChangeText={setCardNumber}
+          value={localCardNumber}
+          onChangeText={setLocalCardNumber}
           placeholder="XXXX-XXXX-XXXX-XXXX"
           keyboardType="number-pad"
         />
@@ -86,8 +85,8 @@ const TopUpDebitScreen = () => {
         <Text style={styles.inputLabel}>Expiration (MM/YY)</Text>
         <TextInput
           style={styles.input}
-          value={expiry}
-          onChangeText={setExpiry}
+          value={localExpiry}
+          onChangeText={setLocalExpiry}
           placeholder="MM/YY"
           keyboardType="default"
         />
@@ -95,8 +94,8 @@ const TopUpDebitScreen = () => {
         <Text style={styles.inputLabel}>CVV</Text>
         <TextInput
           style={styles.input}
-          value={cvv}
-          onChangeText={setCvv}
+          value={localCvv}
+          onChangeText={setLocalCvv}
           placeholder="XXX"
           keyboardType="number-pad"
           secureTextEntry

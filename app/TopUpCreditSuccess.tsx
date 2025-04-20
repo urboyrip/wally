@@ -2,16 +2,12 @@
 import React, { useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
-import { useTopup } from "@/context/topupContext"; // Jika ingin reset state setelah sukses
+import { router } from "expo-router";
+import { useTopup } from "@/context/topupContext";
 
 const TopUpCreditSuccessScreen = () => {
-  const { amount, cardNumber, expiry } = useLocalSearchParams<{
-    amount: string;
-    cardNumber: string;
-    expiry: string;
-  }>();
-  const { resetTopupData } = useTopup(); 
+  const { amount, cardDetails, resetTopupData } = useTopup();
+    const { cardNumber, expiry } = cardDetails; 
 
   const transactionDate = new Date().toLocaleDateString("id-ID", {
     year: "numeric",

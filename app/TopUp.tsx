@@ -17,49 +17,49 @@ import { useTopup } from "@/context/topupContext";
 const MAX_BALANCE = 20000000;
 
 const TopupScreen = () => {
-    const { selectedMethod, setSelectedMethod, amount, setAmount, resetTopupData } = useTopup();
-    const [isMethodDropdownVisible, setIsMethodDropdownVisible] = useState(false);
-    const [isAmountEditing, setIsAmountEditing] = useState(false);
-  
-    const topupMethods = ["Debit Card", "Credit Card", "QRIS"];
-  
-    const formatRupiah = (value: string) => {
-      const numericValue = value.replace(/\D/g, "");
-      return (
-        "Rp" +
-        (numericValue ? parseInt(numericValue, 10).toLocaleString("id-ID") : "0")
-      );
-    };
-  
-    const handleNext = () => {
-        if (selectedMethod === "Choose Topup Method") {
-          Alert.alert("Peringatan", "Pilih metode top up terlebih dahulu.");
-          return;
-        }
-    
-        const numericAmount = parseFloat(amount.replace(/\D/g, ""));
-        if (!amount.trim() || numericAmount === 0) {
-          Alert.alert("Peringatan", "Masukkan jumlah top up.");
-          return;
-        }
-    
-        if (selectedMethod === "Debit Card") {
-          router.push({ pathname: "/TopUpDebit", params: { amount: numericAmount.toString() } });
-        } else if (selectedMethod === "Credit Card") {
-          router.push({ pathname: "/TopUpCredit", params: { amount: numericAmount.toString() } });
-        } else if (selectedMethod === "QRIS") {
-          router.push({ pathname: "/", params: { amount: numericAmount.toString() } });
-        }
-      };
-  
-    const toggleMethodDropdown = () => {
-      setIsMethodDropdownVisible(!isMethodDropdownVisible);
-    };
-  
-    const selectMethod = (method: string) => {
-      setSelectedMethod(method);
-      setIsMethodDropdownVisible(false);
-    };
+  const { selectedMethod, setSelectedMethod, amount, setAmount, resetTopupData } = useTopup();
+  const [isMethodDropdownVisible, setIsMethodDropdownVisible] = useState(false);
+  const [isAmountEditing, setIsAmountEditing] = useState(false);
+
+  const topupMethods = ["Debit Card", "Credit Card", "QRIS"];
+
+  const formatRupiah = (value: string) => {
+    const numericValue = value.replace(/\D/g, "");
+    return (
+      "Rp" +
+      (numericValue ? parseInt(numericValue, 10).toLocaleString("id-ID") : "0")
+    );
+  };
+
+  const handleNext = () => {
+    if (selectedMethod === "Choose Topup Method") {
+      Alert.alert("Peringatan", "Pilih metode top up terlebih dahulu.");
+      return;
+    }
+
+    const numericAmount = parseFloat(amount.replace(/\D/g, ""));
+    if (!amount.trim() || numericAmount === 0) {
+      Alert.alert("Peringatan", "Masukkan jumlah top up.");
+      return;
+    }
+
+    if (selectedMethod === "Debit Card") {
+      router.push("/TopUpDebit"); // Tidak perlu mengirimkan amount sebagai params
+    } else if (selectedMethod === "Credit Card") {
+      router.push("/TopUpCredit"); // Tidak perlu mengirimkan amount sebagai params
+    } else if (selectedMethod === "QRIS") {
+      router.push("/"); // Asumsi rute QRIS Anda, tidak mengirimkan amount
+    }
+  };
+
+  const toggleMethodDropdown = () => {
+    setIsMethodDropdownVisible(!isMethodDropdownVisible);
+  };
+
+  const selectMethod = (method: string) => {
+    setSelectedMethod(method);
+    setIsMethodDropdownVisible(false);
+  };
 
   return (
     <KeyboardAvoidingView
@@ -115,7 +115,7 @@ const TopupScreen = () => {
           onPress={() => setIsAmountEditing(true)}
           activeOpacity={1}
         >
-        <Text style={styles.labeltopup}>Top Up Amount</Text>
+          <Text style={styles.labeltopup}>Top Up Amount</Text>
           {isAmountEditing ? (
             <TextInput
               autoFocus
@@ -128,8 +128,8 @@ const TopupScreen = () => {
             />
           ) : (
             <>
-            <Text style={styles.amountText}>{formatRupiah(amount)}</Text>
-            <Text style={styles.minNote}>Minimum Rp10.000</Text>
+              <Text style={styles.amountText}>{formatRupiah(amount)}</Text>
+              <Text style={styles.minNote}>Minimum Rp10.000</Text>
             </>
           )}
         </TouchableOpacity>
