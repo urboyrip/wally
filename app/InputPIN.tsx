@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   keyboard: {
-    marginTop: 10,
+    marginTop: 20,
     gap: 10,
   },
   row: {
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#6A1B9A",
+    backgroundColor: "#transparent",
     justifyContent: "center",
     alignItems: "center",
     margin: 5,
