@@ -48,7 +48,7 @@ const TopupScreen = () => {
     } else if (selectedMethod === "Credit Card") {
       router.push("/TopUpCredit"); // Tidak perlu mengirimkan amount sebagai params
     } else if (selectedMethod === "QRIS") {
-      router.push("/"); // Asumsi rute QRIS Anda, tidak mengirimkan amount
+      router.push("/TopUpQRIS"); // Asumsi rute QRIS Anda, tidak mengirimkan amount
     }
   };
 

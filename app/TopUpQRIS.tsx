@@ -1,9 +1,8 @@
-// TopUpDebitScreen.tsx
+// TopUpQRISScreen.tsx
 import React from "react";
 import {
   View,
   Text,
-  TextInput,
   StyleSheet,
   TouchableOpacity,
   KeyboardAvoidingView,
@@ -15,28 +14,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTopup } from "@/context/topupContext";
 
-const TopUpDebitScreen = () => {
-  const { amount, setCardDetails } = useTopup();
-  const [localCardNumber, setLocalCardNumber] = React.useState("");
-  const [localExpiry, setLocalExpiry] = React.useState("");
-  const [localCvv, setLocalCvv] = React.useState("");
+const TopUpQRISScreen = () => {
+  const { amount } = useTopup();
 
   const handleNext = () => {
-    if (!localCardNumber.trim() || localCardNumber.length < 16) {
-      Alert.alert("Peringatan", "Nomor kartu tidak valid.");
+    const numericAmount = parseFloat(amount.replace(/\D/g, ""));
+    if (!amount.trim() || numericAmount === 0) {
+      Alert.alert("Peringatan", "Jumlah top up tidak valid.");
       return;
     }
-    if (!localExpiry.trim() || localExpiry.length !== 5 || !localExpiry.includes("/")) {
-      Alert.alert("Peringatan", "Format tanggal kedaluwarsa tidak valid (MM/YY).");
-      return;
-    }
-    if (!localCvv.trim() || localCvv.length < 3) {
-      Alert.alert("Peringatan", "CVV tidak valid.");
-      return;
-    }
-
-    setCardDetails({ cardNumber: localCardNumber, expiry: localExpiry, cvv: localCvv });
-    router.push("/TopUpDebitConfirm");
+    router.push("/TopUpQRISConfirm");
   };
 
   return (
@@ -49,7 +36,7 @@ const TopUpDebitScreen = () => {
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Debit Card</Text>
+          <Text style={styles.headerTitle}>QRIS</Text>
         </View>
 
         <View style={styles.balanceCard}>
@@ -63,43 +50,21 @@ const TopUpDebitScreen = () => {
 
         <Text style={styles.label}>Choose Top Up Method</Text>
         <View style={styles.selectedMethodContainer}>
-          <Text style={styles.selectedMethodText}>Debit Card</Text>
+          <Text style={styles.selectedMethodText}>QRIS</Text>
         </View>
 
         <View style={styles.amountBox}>
           <Text style={styles.labeltopup}>Top Up Amount</Text>
-          <Text style={styles.amountText}>Rp{parseInt(amount).toLocaleString("id-ID")}</Text>
+          <Text style={styles.amountText}>
+            Rp{parseInt(amount).toLocaleString("id-ID")}
+          </Text>
           <Text style={styles.minNote}>Minimum Rp10.000</Text>
         </View>
 
-        <Text style={styles.label}>Card Information</Text>
-        <Text style={styles.inputLabel}>Card Number</Text>
-        <TextInput
-          style={styles.input}
-          value={localCardNumber}
-          onChangeText={setLocalCardNumber}
-          placeholder="XXXX-XXXX-XXXX-XXXX"
-          keyboardType="number-pad"
-        />
-
-        <Text style={styles.inputLabel}>Expiration (MM/YY)</Text>
-        <TextInput
-          style={styles.input}
-          value={localExpiry}
-          onChangeText={setLocalExpiry}
-          placeholder="MM/YY"
-          keyboardType="default"
-        />
-
-        <Text style={styles.inputLabel}>CVV</Text>
-        <TextInput
-          style={styles.input}
-          value={localCvv}
-          onChangeText={setLocalCvv}
-          placeholder="XXX"
-          keyboardType="number-pad"
-          secureTextEntry
-        />
+        <Text style={styles.infoText}>
+          Setelah menekan 'Next', QR Code akan ditampilkan. Silakan scan QR Code
+          tersebut menggunakan aplikasi pembayaran yang mendukung QRIS.
+        </Text>
 
         <TouchableOpacity style={styles.button} onPress={handleNext}>
           <Text style={styles.buttonText}>Next</Text>
@@ -109,7 +74,7 @@ const TopUpDebitScreen = () => {
   );
 };
 
-export default TopUpDebitScreen;
+export default TopUpQRISScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -176,23 +141,6 @@ const styles = StyleSheet.create({
     color: "#888",
     marginTop: 4,
   },
-  inputLabel: {
-    fontSize: 14,
-    color: "#555",
-    marginBottom: 4,
-  },
-  input: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    paddingVertical: 8,
-    fontSize: 16,
-    marginBottom: 16,
-  },
-  row: {
-    flexDirection: "row",
-    gap: 20,
-    marginBottom: 16,
-  },
   button: {
     backgroundColor: "#A020F0",
     paddingVertical: 14,
@@ -214,5 +162,11 @@ const styles = StyleSheet.create({
   selectedMethodText: {
     fontSize: 16,
     color: "#333",
+  },
+  infoText: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 20,
+    textAlign: "center",
   },
 });
