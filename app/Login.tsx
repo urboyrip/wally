@@ -46,7 +46,7 @@ const LoginScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={() => router.push("/Transfer")}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
 

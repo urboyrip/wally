@@ -6,7 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  Linking,
+  ScrollView,
 } from "react-native";
 import Checkbox from "expo-checkbox";
 import { router } from "expo-router";
@@ -14,85 +14,94 @@ import { Ionicons } from "@expo/vector-icons";
 
 const RegisterScreen = () => {
   const [isChecked, setChecked] = useState(false);
-  const [securePass, setSecurePass] = useState(true);
-  const [secureRePass, setSecureRePass] = useState(true);
+  const [securePass, setSecurePass] = useState(false);
+  const [secureRePass, setSecureRePass] = useState(false);
 
   return (
-    <View style={styles.container}>
-      <View
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          paddingBottom: 40,
-        }}
-      >
-        <Image source={require("../assets/images/logo.png")} />
-      </View>
-      <Text style={styles.welcome}>Register Your Account</Text>
-      <Text style={styles.subtext}>Lets's get started</Text>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View
+          style={{
+            alignItems: "center",
+            paddingBottom: 40,
+          }}
+        >
+          <Image source={require("../assets/images/logo.png")} />
+        </View>
+        <Text style={styles.welcome}>Register Your Account</Text>
+        <Text style={styles.subtext}>Lets's get started</Text>
 
-      <TextInput style={styles.input} placeholder="Full Name" />
-      <TextInput style={styles.input} placeholder="Email" />
-      <View style={styles.passwordContainer}>
-        <TextInput
-          style={styles.passwordInput}
-          placeholder="Password"
-          secureTextEntry={securePass}
-        />
-        <TouchableOpacity onPress={() => setSecurePass(!securePass)}>
-          <Ionicons name={securePass ? "eye-off" : "eye"} size={20} color="#A020F0" />
+        <TextInput style={styles.input} placeholder="Full Name" />
+        <TextInput style={styles.input} placeholder="Email" />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Password"
+            secureTextEntry={securePass}
+          />
+          <TouchableOpacity onPress={() => setSecurePass(!securePass)}>
+            <Ionicons
+              name={securePass ? "eye-off" : "eye"}
+              size={20}
+              color="#A020F0"
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Re - Enter Password"
+            secureTextEntry={secureRePass}
+          />
+          <TouchableOpacity onPress={() => setSecureRePass(!secureRePass)}>
+            <Ionicons
+              name={secureRePass ? "eye-off" : "eye"}
+              size={20}
+              color="#A020F0"
+            />
+          </TouchableOpacity>
+        </View>
+
+        <TextInput style={styles.input} placeholder="Phone Number" />
+
+        <View style={styles.checkboxContainer}>
+          <Checkbox value={isChecked} onValueChange={setChecked} />
+          <Text style={styles.checkboxText}>
+            I have read and agreed to the{" "}
+            <Text
+              style={styles.link}
+              onPress={() => router.push("/TNCRegister")}
+            >
+              Terms and Conditions
+            </Text>
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={[styles.button, { opacity: isChecked ? 1 : 0.5 }]}
+          disabled={!isChecked}
+        >
+          <Text style={styles.buttonText} onPress={() => router.push("/PINRegist")}>Register</Text>
         </TouchableOpacity>
-      </View>
 
-      {/* Re-enter Password */}
-      <View style={styles.passwordContainer}>
-        <TextInput
-          style={styles.passwordInput}
-          placeholder="Re - Enter Password"
-          secureTextEntry={secureRePass}
-        />
-        <TouchableOpacity onPress={() => setSecureRePass(!secureRePass)}>
-          <Ionicons name={secureRePass ? "eye-off" : "eye"} size={20} color="#A020F0" />
-        </TouchableOpacity>
-      </View>
-
-      
-
-      <View style={styles.checkboxContainer}>
-        <Checkbox value={isChecked} onValueChange={setChecked} />
-        <Text style={styles.checkboxText}>
-          I have read and agreed to the{" "}
-          <Text style={styles.link} onPress={() => router.push("/TNCRegister")}>
-            Terms and Conditions
+        <Text style={styles.registerText}>
+          Don’t have an account?{" "}
+          <Text style={styles.link} onPress={() => router.push("/Login")}>
+            Login here
           </Text>
         </Text>
-      </View>
-
-      <TouchableOpacity
-        style={[styles.button, { opacity: isChecked ? 1 : 0.5 }]}
-        disabled={!isChecked}
-      >
-        <Text style={styles.buttonText}>Register</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.registerText}>
-        Don’t have an account?{" "}
-        <Text style={styles.link} onPress={() => router.push("/Login")}>
-          Login here
-        </Text>
-      </Text>
-    </View>
+      </ScrollView>
   );
 };
 
 export default RegisterScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  content: {
+    flexGrow:1,
     backgroundColor: "#fff",
     paddingHorizontal: 32,
-    justifyContent: "center",
+    paddingTop: 48,
+    paddingBottom: 80,
   },
   welcome: {
     fontSize: 20,

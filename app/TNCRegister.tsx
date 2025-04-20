@@ -18,7 +18,7 @@ const TnCScreen = () => {
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
       </View>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Image source={require("../assets/images/logo.png")} />
         <Text style={styles.title}>Terms and Conditions</Text>
 
@@ -72,11 +72,8 @@ const TnCScreen = () => {
 export default TnCScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-  },
   content: {
+    flexGrow:1,
     padding: 24,
     paddingBottom: 80,
   },
