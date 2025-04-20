@@ -39,7 +39,7 @@ const TransSuccessScreen = () => {
 
   const handleBackToHome = () => {
     resetTransferData();
-    router.push("/");
+    router.push("/Home");
   };
 
   return (

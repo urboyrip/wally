@@ -46,16 +46,8 @@ const LoginScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/home")}>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/Home')}>
         <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/Transfer")}>
-        <Text style={styles.buttonText}>Transfer</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/TopUp")}>
-        <Text style={styles.buttonText}>TopUp</Text>
       </TouchableOpacity>
 
       <Text style={styles.registerText}>

@@ -22,7 +22,7 @@ const TopUpCreditSuccessScreen = () => {
 
   const handleBackToHome = () => {
     resetTopupData();
-    router.push("/");
+    router.push("/Home");
   };
 
   return (

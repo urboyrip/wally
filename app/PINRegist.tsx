@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Platform,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -26,26 +25,38 @@ const CreatePinScreen = () => {
   const [stage, setStage] = useState<'create' | 'reenter'>('create');
   const pinLength = 6;
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pinCreated, setPinCreated] = useState(false);
+  const [navigationTimerActive, setNavigationTimerActive] = useState(false);
 
   useEffect(() => {
     if (stage === 'reenter' && confirmPin.length === pinLength) {
       if (pin === confirmPin) {
-        
         console.log('PIN berhasil dibuat:', pin);
+        setPinCreated(true);
+        setNavigationTimerActive(true); // Aktifkan timer navigasi
         if (Platform.OS !== 'web') {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }
-        Alert.alert('Sukses', 'PIN berhasil dibuat!');
-        
       } else {
         setErrorMessage('PIN tidak cocok. Silakan coba lagi.');
-        setConfirmPin(''); 
+        setConfirmPin('');
         if (Platform.OS !== 'web') {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         }
       }
     }
   }, [stage, pin, confirmPin]);
+
+  useEffect(() => {
+    if (navigationTimerActive) {
+      const timer = setTimeout(() => {
+        router.push('/Home');
+      }, 4000); // Timer 4 detik (4000 milisekon)
+
+      // Bersihkan timer jika komponen unmount atau timer tidak lagi aktif
+      return () => clearTimeout(timer);
+    }
+  }, [navigationTimerActive, router]);
 
   useEffect(() => {
     if (stage === 'create' && pin.length === pinLength) {
@@ -252,7 +263,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'transparent', 
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
     margin: 5,
