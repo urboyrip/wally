@@ -14,6 +14,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTransfer } from "@/context/transferContext";
 
+const WALLY_BALANCE = 1000000; // Definisikan saldo Wally
+
 const TransferScreen = () => {
   const {
     accountNumber,
@@ -52,6 +54,14 @@ const TransferScreen = () => {
       return;
     }
 
+    if (numericAmount > WALLY_BALANCE) {
+      Alert.alert(
+        "Peringatan",
+        `Jumlah transfer melebihi saldo Anda (Rp${WALLY_BALANCE.toLocaleString("id-ID")}).`
+      );
+      return;
+    }
+
     // Set data ke context sebelum navigasi
     setRecipientName("Ahmad Jaelani"); // Data statis, bisa diganti dengan input
     setSenderName("Sandy Yuyu");     // Data statis
@@ -87,7 +97,7 @@ const TransferScreen = () => {
           <Ionicons name="wallet" size={24} color="#A020F0" />
           <View style={{ marginLeft: 12 }}>
             <Text>Wally Balance</Text>
-            <Text style={{ fontWeight: "bold" }}>Rp1.000.000</Text>
+            <Text style={{ fontWeight: "bold" }}>Rp{WALLY_BALANCE.toLocaleString("id-ID")}</Text>
           </View>
         </View>
 
