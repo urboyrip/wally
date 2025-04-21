@@ -1,18 +1,19 @@
-import { Text, View, Image, TouchableOpacity, Pressable, Dimensions, StyleSheet } from "react-native";
+import { Text, View, Image, TouchableOpacity, Pressable, Dimensions, StyleSheet, ScrollView } from "react-native";
 import { useState } from "react";
-import { Link, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 const { width } = Dimensions.get('window');
 
 export default function Index() {
   const [showBalance, setShowBalance] = useState(true);
   const [showRecord, setShowRecord] = useState(true);
-  const router = useRouter();
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'white' }}>
-
+    <SafeAreaView  style={{ flex: 1, backgroundColor: 'white'}}>
+     <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
       <View style={styles.headerContainer}>
         <View style={styles.logoContainer}>
           <Image source={require('../assets/images/logo1.png')} style={styles.logoImage} />
@@ -21,14 +22,15 @@ export default function Index() {
         <View style={styles.rightHeaderContainer}>
           <Image source={require('../assets/images/theme.png')} style={styles.themeIcon} />
           <Image source={require('../assets/images/garis.png')} style={styles.separator} />
-          <TouchableOpacity onPress={() => router.push('/profile')}>
+          <TouchableOpacity onPress={() => router.push('/Login')}>
             <Image source={require('../assets/images/Foto.jpg')} style={styles.profilePic} />
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={{ paddingHorizontal: 15, marginTop: 15 }}>
-        <Text style={{ color: "#3A1D6E", fontWeight: "600", fontSize: 30 }}>Welcome, Sandy!</Text>
+        <Text style={{ color: "#3A1D6E", fontWeight: "600", fontSize: 25 }}>Welcome, Sandy!</Text>
+        <Text style={{ color: "black", fontWeight: "100", fontSize: 15 }}>Your wallet’s all set and secure. Let’s get started.</Text>
       </View>
 
       <LinearGradient colors={["#9B30FF", "#3A1D6E"]} style={styles.balanceCard}>
@@ -40,17 +42,22 @@ export default function Index() {
         <View style={styles.balanceRow}>
           <Text style={styles.balanceText}>{showBalance ? "Rp 1.000.000,00" : "************"}</Text>
           <TouchableOpacity onPress={() => setShowBalance(!showBalance)}>
-            <Image source={showBalance ? require('../assets/images/eye1-on.png') : require('../assets/images/eye1-off.png')} style={styles.eyeIcon} />
+            <Ionicons
+                name={showBalance ? "eye-off" : "eye"}
+                size={25}
+                color="white"
+                style={{marginTop:8}}
+            />
           </TouchableOpacity>
         </View>
       </LinearGradient>
 
       <View style={styles.actionButtonContainer}>
-        <Pressable onPress={() => router.push('/transfer')} style={({ pressed }) => [styles.actionButton, { borderColor: '#9F2BFB' }, pressed && { backgroundColor: '#f2e8fd' }] }>
+        <Pressable onPress={() => router.push('/Transfer')} style={({ pressed }) => [styles.actionButton, { borderColor: '#9F2BFB' }, pressed && { backgroundColor: '#f2e8fd' }] }>
           <Image source={require('../assets/images/transfer.png')} style={styles.actionIcon} />
           <Text style={styles.actionText}>Transfer</Text>
         </Pressable>
-        <Pressable onPress={() => router.push('/topup')} style={({ pressed }) => [styles.actionButton, { borderColor: '#9F2BFB' }, pressed && { backgroundColor: '#f2e8fd' }] }>
+        <Pressable onPress={() => router.push('/TopUp')} style={({ pressed }) => [styles.actionButton, { borderColor: '#9F2BFB' }, pressed && { backgroundColor: '#f2e8fd' }] }>
           <Image source={require('../assets/images/topup.png')} style={styles.actionIcon} />
           <Text style={styles.actionText}>Topup</Text>
         </Pressable>
@@ -61,7 +68,11 @@ export default function Index() {
         <View style={styles.recordsHeader}>
           <Text style={styles.recordDate}>1 Apr 2025 - 30 Apr 2025</Text>
           <TouchableOpacity onPress={() => setShowRecord(!showRecord)}>
-            <Image source={showRecord ? require('../assets/images/eye2-on.png') : require('../assets/images/eye2-off.png')} style={styles.eyeIconSmall} />
+            <Ionicons
+                name={showRecord ? "eye-off" : "eye"}
+                size={25}
+                color="#A020F0"
+            />
           </TouchableOpacity>
         </View>
 
@@ -87,13 +98,14 @@ export default function Index() {
             <Text style={styles.differenceLabel}>Difference</Text>
             <Text style={styles.differenceAmount}>{showRecord ? "Rp200.000" : "******"}</Text>
           </View>
-          <Pressable onPress={() => router.push('/details')} style={({ pressed }) => [styles.seeDetailsRow, pressed && { opacity: 0.6 }] }>
+          <Pressable onPress={() => router.push('/transactions')} style={({ pressed }) => [styles.seeDetailsRow, pressed && { opacity: 0.6 }] }>
             <Text style={styles.seeDetailsText}>See Details</Text>
             <Image source={require('../assets/images/back.png')} style={styles.seeDetailsIcon} />
           </Pressable>
         </View>
       </View>
-    </View>
+     </ScrollView>
+    </SafeAreaView >
   );
 }
 
@@ -187,10 +199,7 @@ const styles = StyleSheet.create({
   },
   recordDate: { color: "black", fontSize: 11 },
   eyeIconSmall: { width: 23, height: 20 },
-  recordCardsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
+  recordCardsRow: { flexDirection: "row", justifyContent: "space-between" },
   recordCard: {
     height: 120,
     width: (width - 45) / 2,
