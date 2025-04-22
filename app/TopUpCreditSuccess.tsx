@@ -1,5 +1,3 @@
-// TopUpCreditSuccessScreen.tsx
-import React, { useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -7,7 +5,8 @@ import { useTopup } from "@/context/topupContext";
 
 const TopUpCreditSuccessScreen = () => {
   const { amount, cardDetails, resetTopupData } = useTopup();
-    const { cardNumber, expiry } = cardDetails; 
+  const cardNumber = cardDetails?.cardNumber || "";
+  const expiry = cardDetails?.expiry || "";
 
   const transactionDate = new Date().toLocaleDateString("id-ID", {
     year: "numeric",
@@ -40,16 +39,15 @@ const TopUpCreditSuccessScreen = () => {
       </View>
 
       <View style={styles.detailCard}>
-        <Text style={styles.detailTitle}>Credit Card Topup</Text>{" "}
-       
+        <Text style={styles.detailTitle}>Credit Card Topup</Text>
+        
         <View style={styles.cardInfo}>
           <View style={styles.iconContainer}>
-            <Ionicons name="card-outline" size={48} color="#888" />{" "}
-            
+            <Ionicons name="card-outline" size={48} color="#888" />
           </View>
           <View style={styles.cardDetails}>
             <Text style={styles.cardNumber}>
-              **** **** **** {cardNumber?.slice(-4)}
+              **** **** **** {cardNumber.slice(-4)}
             </Text>
             <Text style={styles.expiryCvv}>Expiration {expiry}</Text>
             <Text style={styles.expiryCvv}>(CVV)</Text>
@@ -68,7 +66,7 @@ const TopUpCreditSuccessScreen = () => {
       </View>
 
       <TouchableOpacity
-        style={styles.backHomeButton}
+        style={styles.absoluteButton}
         onPress={handleBackToHome}
       >
         <Text style={styles.backHomeButtonText}>Back to home</Text>
@@ -154,11 +152,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
   },
-  backHomeButton: {
+  absoluteButton: {
     backgroundColor: "#A020F0",
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: "center",
+    marginHorizontal: 24,
+    marginBottom: 24,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   backHomeButtonText: {
     color: "#fff",

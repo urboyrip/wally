@@ -1,16 +1,17 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Keyboard,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useTransfer } from "@/context/transferContext";
 
-const ConfirmationScreen = () => {
+const ConfirmationScreen: React.FC = () => {
   const {
     accountNumber,
     amount,
@@ -19,59 +20,65 @@ const ConfirmationScreen = () => {
     senderName,
     senderAccount,
   } = useTransfer();
+  
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+    <View style={styles.container}>
+      <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Confirmation</Text>
+        </View>
+
+        <Text style={styles.label}>Recipient</Text>
+        <View style={styles.card}>
+          <Text style={styles.name}>{recipientName}</Text>
+          <Text style={styles.account}>{accountNumber}</Text>
+        </View>
+
+        <Text style={styles.label}>Source of Fund</Text>
+        <View style={styles.card}>
+          <Text style={styles.name}>{senderName}</Text>
+          <Text style={styles.account}>{senderAccount}</Text>
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.leftText}>Notes</Text>
+          <Text style={styles.rightText}>{note || "-"}</Text>
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.leftText}>Amount</Text>
+          <Text style={styles.rightText}>
+            Rp{parseInt(amount || "0").toLocaleString("id-ID")}
+          </Text>
+        </View>
+        
+        {/* Tambahkan spacer di bawah content */}
+        <View style={{ height: 80 }} />
+      </ScrollView>
+      
+        <TouchableOpacity
+          style={styles.absoluteButton}
+          onPress={() =>
+            router.push({
+              pathname: "/InputPIN",
+              params: {
+                recipientAccount: accountNumber,
+                amount: amount,
+                note: note,
+                recipientName: recipientName,
+                senderName: senderName,
+                senderAccount: senderAccount,
+              },
+            })
+          }
+        >
+          <Text style={styles.buttonText}>Confirm</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Confirmation</Text>
-      </View>
-
-      <Text style={styles.label}>Recipient</Text>
-      <View style={styles.card}>
-        <Text style={styles.name}>{recipientName}</Text>
-        <Text style={styles.account}>{accountNumber}</Text>
-      </View>
-
-      <Text style={styles.label}>Source of Fund</Text>
-      <View style={styles.card}>
-        <Text style={styles.name}>{senderName}</Text>
-        <Text style={styles.account}>{senderAccount}</Text>
-      </View>
-
-      <View style={styles.row}>
-        <Text style={styles.leftText}>Notes</Text>
-        <Text style={styles.rightText}>{note || "-"}</Text>
-      </View>
-
-      <View style={styles.row}>
-        <Text style={styles.leftText}>Amount</Text>
-        <Text style={styles.rightText}>
-          Rp{parseInt(amount as string).toLocaleString("id-ID")}
-        </Text>
-      </View>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() =>
-          router.push({
-            pathname: "/InputPIN",
-            params: {
-              recipientAccount: accountNumber,
-              amount: amount,
-              note: note,
-              recipientName: recipientName,
-              senderName: senderName,
-              senderAccount: senderAccount,
-            },
-          })
-        }
-      >
-        <Text style={styles.buttonText}>Confirm</Text>
-      </TouchableOpacity>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -79,9 +86,13 @@ export default ConfirmationScreen;
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  content: {
+    flex: 1,
     padding: 24,
     backgroundColor: "#fff",
-    flexGrow: 1,
   },
   header: {
     flexDirection: "row",
@@ -128,12 +139,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
-  button: {
+  absoluteButton: {
     backgroundColor: "#A020F0",
-    padding: 14,
+    paddingVertical: 14,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 24,
+    marginHorizontal: 24,
+    marginBottom: 24,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   buttonText: {
     color: "#fff",

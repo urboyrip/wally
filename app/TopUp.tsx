@@ -1,14 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Alert,
+  Keyboard
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -17,18 +16,42 @@ import { useTopup } from "@/context/topupContext";
 const MAX_BALANCE = 20000000;
 
 const TopupScreen = () => {
-  const { selectedMethod, setSelectedMethod, amount, setAmount, resetTopupData } = useTopup();
+  const {
+    selectedMethod,
+    setSelectedMethod,
+    amount,
+    setAmount,
+    resetTopupData,
+  } = useTopup();
   const [isMethodDropdownVisible, setIsMethodDropdownVisible] = useState(false);
   const [isAmountEditing, setIsAmountEditing] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   const topupMethods = ["Debit Card", "Credit Card", "QRIS"];
 
-  const formatRupiah = (value: string) => {
+  useEffect(() => {
+      const keyboardDidShowListener = Keyboard.addListener(
+        "keyboardDidShow",
+        () => {
+          setKeyboardVisible(true);
+        }
+      );
+      const keyboardDidHideListener = Keyboard.addListener(
+        "keyboardDidHide",
+        () => {
+          setKeyboardVisible(false);
+        }
+      );
+  
+      return () => {
+        keyboardDidShowListener.remove();
+        keyboardDidHideListener.remove();
+      };
+    }, []);
+
+  const handleAmountChange = (value: string): void => {
     const numericValue = value.replace(/\D/g, "");
-    return (
-      "Rp" +
-      (numericValue ? parseInt(numericValue, 10).toLocaleString("id-ID") : "0")
-    );
+    setAmount(numericValue);
   };
 
   const handleNext = () => {
@@ -44,11 +67,11 @@ const TopupScreen = () => {
     }
 
     if (selectedMethod === "Debit Card") {
-      router.push("/TopUpDebit"); // Tidak perlu mengirimkan amount sebagai params
+      router.push("/TopUpDebit");
     } else if (selectedMethod === "Credit Card") {
-      router.push("/TopUpCredit"); // Tidak perlu mengirimkan amount sebagai params
+      router.push("/TopUpCredit");
     } else if (selectedMethod === "QRIS") {
-      router.push("/TopUpQRIS"); // Asumsi rute QRIS Anda, tidak mengirimkan amount
+      router.push("/TopUpQRIS");
     }
   };
 
@@ -62,11 +85,8 @@ const TopupScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={{ flex: 1 }}
-    >
-      <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color="#000" />
@@ -116,33 +136,40 @@ const TopupScreen = () => {
           activeOpacity={1}
         >
           <Text style={styles.labeltopup}>Top Up Amount</Text>
-          {isAmountEditing ? (
-            <TextInput
-              autoFocus
-              style={styles.amountInput}
-              value={amount}
-              onChangeText={setAmount}
-              placeholder="0"
-              keyboardType="numeric"
-              onBlur={() => setIsAmountEditing(false)}
-            />
-          ) : (
-            <>
-              <Text style={styles.amountText}>{formatRupiah(amount)}</Text>
-              <Text style={styles.minNote}>Minimum Rp10.000</Text>
-            </>
-          )}
+          <View style={styles.amountContainer}>
+            <Text style={styles.rupiahPrefix}>Rp</Text>
+            {isAmountEditing ? (
+              <TextInput
+                autoFocus
+                style={styles.amountInput}
+                value={amount.replace(/\D/g, "")}
+                onChangeText={handleAmountChange}
+                placeholder="0"
+                keyboardType="numeric"
+                onBlur={() => setIsAmountEditing(false)}
+              />
+            ) : (
+              <Text style={styles.amountText}>
+                {amount ? parseInt(amount, 10).toLocaleString("id-ID") : "0"}
+              </Text>
+            )}
+          </View>
+          <Text style={styles.minNote}>Minimum Rp10.000</Text>
         </TouchableOpacity>
+        <View style={{ height: 80 }} />
+        </ScrollView>
 
+        {!keyboardVisible && (
         <TouchableOpacity
-          style={styles.button}
+          style={styles.absoluteButton}
           onPress={handleNext}
           disabled={selectedMethod === "Choose Topup Method"}
         >
           <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        )}
+      
+    </View>
   );
 };
 
@@ -150,7 +177,11 @@ export default TopupScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  content: {
+    flex: 1,
     padding: 24,
     backgroundColor: "#fff",
   },
@@ -189,8 +220,8 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     color: "#555",
-    marginBottom: 8,
-    marginTop: 16,
+    marginBottom: 0,
+    marginTop: 40,
   },
   labeltopup: {
     fontSize: 14,
@@ -225,7 +256,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#f3eaff",
     padding: 16,
     marginBottom: 8,
-    marginTop:16
+    marginTop: 16,
+  },
+  amountContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  rupiahPrefix: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginRight: 2,
   },
   amountText: {
     fontSize: 20,
@@ -234,18 +274,25 @@ const styles = StyleSheet.create({
   amountInput: {
     fontSize: 20,
     fontWeight: "bold",
+    flex: 1,
+    padding: 0,
   },
   minNote: {
     fontSize: 12,
     color: "#888",
     marginTop: 10,
   },
-  button: {
+  absoluteButton: {
     backgroundColor: "#A020F0",
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 24,
+    marginHorizontal: 24,
+    marginBottom: 24,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   buttonText: {
     color: "#fff",

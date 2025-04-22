@@ -1,13 +1,13 @@
-// CreditCardConfirmationScreen.tsx
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router"
+import { router } from "expo-router";
 import { useTopup } from "@/context/topupContext";
 
 const CreditCardConfirmationScreen = () => {
   const { amount, cardDetails } = useTopup();
-    const { cardNumber, expiry } = cardDetails;
+  const cardNumber = cardDetails?.cardNumber || "";
+  const expiry = cardDetails?.expiry || "";
 
   const handleConfirmTopup = () => {
     router.push({
@@ -26,14 +26,14 @@ const CreditCardConfirmationScreen = () => {
         <Text style={styles.headerTitle}>Confirmation</Text>
       </View>
 
-      <Text style={styles.topupMethodTitle}>Credit Card Topup</Text> {/* Ubah teks metode */}
+      <Text style={styles.topupMethodTitle}>Credit Card Topup</Text>
 
       <View style={styles.cardInfo}>
         <View style={styles.iconContainer}>
-          <Ionicons name="card-outline" size={48} color="#888" /> {/* Ganti ikon jika perlu */}
+          <Ionicons name="card-outline" size={48} color="#888" />
         </View>
         <View style={styles.cardDetails}>
-          <Text style={styles.cardNumber}>**** **** **** {cardNumber?.slice(-4)}</Text>
+          <Text style={styles.cardNumber}>**** **** **** {cardNumber.slice(-4)}</Text>
           <Text style={styles.expiryCvv}>Expiration {expiry}</Text>
           <Text style={styles.expiryCvv}>(CVV)</Text>
         </View>
@@ -44,7 +44,7 @@ const CreditCardConfirmationScreen = () => {
         <Text style={styles.amountValue}>Rp{parseInt(amount).toLocaleString("id-ID")}</Text>
       </View>
 
-      <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmTopup}>
+      <TouchableOpacity style={styles.absoluteButton} onPress={handleConfirmTopup}>
         <Text style={styles.confirmButtonText}>Confirm</Text>
       </TouchableOpacity>
     </View>
@@ -114,11 +114,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
   },
-  confirmButton: {
+  absoluteButton: {
     backgroundColor: "#A020F0",
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: "center",
+    marginHorizontal: 24,
+    marginBottom: 24,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   confirmButtonText: {
     color: "#fff",

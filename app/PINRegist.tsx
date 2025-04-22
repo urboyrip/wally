@@ -25,21 +25,22 @@ const CreatePinScreen = () => {
   const [stage, setStage] = useState<'create' | 'reenter'>('create');
   const pinLength = 6;
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [pinCreated, setPinCreated] = useState(false);
+  const [pinCreatedMessage, setPinCreatedMessage] = useState<string | null>(null);
   const [navigationTimerActive, setNavigationTimerActive] = useState(false);
 
   useEffect(() => {
     if (stage === 'reenter' && confirmPin.length === pinLength) {
       if (pin === confirmPin) {
         console.log('PIN berhasil dibuat:', pin);
-        setPinCreated(true);
-        setNavigationTimerActive(true); // Aktifkan timer navigasi
+        setPinCreatedMessage('PIN berhasil dibuat!');
+        setNavigationTimerActive(true);
         if (Platform.OS !== 'web') {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }
       } else {
         setErrorMessage('PIN tidak cocok. Silakan coba lagi.');
         setConfirmPin('');
+        setPinCreatedMessage(null);
         if (Platform.OS !== 'web') {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         }
@@ -50,10 +51,9 @@ const CreatePinScreen = () => {
   useEffect(() => {
     if (navigationTimerActive) {
       const timer = setTimeout(() => {
-        router.push('/Home');
-      }, 4000); // Timer 4 detik (4000 milisekon)
+        router.push('/Login');
+      }, 4000); 
 
-      // Bersihkan timer jika komponen unmount atau timer tidak lagi aktif
       return () => clearTimeout(timer);
     }
   }, [navigationTimerActive, router]);
@@ -62,9 +62,12 @@ const CreatePinScreen = () => {
     if (stage === 'create' && pin.length === pinLength) {
       setStage('reenter');
       setErrorMessage('Re-enter your PIN');
+      setPinCreatedMessage(null); 
       if (Platform.OS !== 'web') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       }
+    } else if (stage === 'create') {
+      setPinCreatedMessage(null); 
     }
   }, [stage, pin]);
 
@@ -110,6 +113,7 @@ const CreatePinScreen = () => {
       setErrorMessage('Create your PIN');
       setConfirmPin('');
       setPin('');
+      setPinCreatedMessage(null); 
     } else {
       router.back();
     }
@@ -133,7 +137,11 @@ const CreatePinScreen = () => {
             ))}
         </View>
 
-        {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
+        {pinCreatedMessage ? (
+          <Text style={styles.errorMessage}>{pinCreatedMessage}</Text>
+        ) : (
+          errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>
+        )}
 
         <View style={styles.keyboard}>
           <View style={styles.row}>
