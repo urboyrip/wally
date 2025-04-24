@@ -1,17 +1,11 @@
-import { Text, View, Image, TouchableOpacity, Pressable, Dimensions, StyleSheet, ScrollView, Animated } from "react-native";
+import {
+  Text, View, Image, TouchableOpacity, Pressable,
+  Dimensions, StyleSheet, ScrollView, Animated,
+} from "react-native";
 import { useState, useEffect, useRef } from "react";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from "@/context/authContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
-
-const { width, height } = Dimensions.get('window');
-const basePadding = width * 0.03;
-const iconSizeSmall = width * 0.05;
-const iconSizeMedium = width * 0.06;
-const iconSizeLarge = width * 0.08;
-const fontSizeSmall = width * 0.035;
-const fontSizeMedium = width * 0.045;
-const fontSizeLarge = width * 0.06;
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -22,11 +16,11 @@ const { width } = Dimensions.get('window');
 export default function Index() {
   const [showBalance, setShowBalance] = useState(true);
   const [showRecord, setShowRecord] = useState(true);
-
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [selectedPeriod, setSelectedPeriod] = useState("thisMonth");
   const [dataUser, setDataUser] = useState("");
+  const { authToken, logout } = useAuth();
 
   const income = 500000;
   const expense = 300000;
@@ -39,32 +33,31 @@ export default function Index() {
 
   useEffect(() => {
     const fetchData = async () => {
-        const token = localStorage.getItem("token");
-        try {
-            const response = await fetch('http://localhost:8080/api/users/7994149544', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "token": "eyJhbGciOiJIUzM4NCJ9.eyJ1c2VySWQiOiI3OTk0MTQ5NTQ0Iiwic3ViIjoic2FuZHlAenp6LmNvbSIsImlhdCI6MTc0NTQ2MDY5NCwiZXhwIjoxNzQ1NDYxMjk0fQ.S_rf0gtmZOsqEGHGPp6TOe7o5QCc_LxLa5uOAtQqh1Lp7xe3GSs2TZ6jTJ6VOUgk"
-                },
-            });
+      try {
+        const response = await fetch('http://localhost:8080/api/users/7994149544', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            token: "eyJhbGciOiJIUzM4NCJ9..." // sebaiknya simpan di .env
+          },
+        });
 
-            const data = await response.json();
-            setDataUser(data);
-            console.log(data);
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        }
+        const data = await response.json();
+        setDataUser(data);
+        console.log(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
 
     fetchData();
-    }, []);
+  }, []);
 
   useEffect(() => {
     const targetOffset = showRecord
       ? circleCircumference * (1 - progress / 100)
       : circleCircumference;
-  
+
     Animated.timing(animatedOffset, {
       toValue: targetOffset,
       duration: 500,
@@ -75,43 +68,20 @@ export default function Index() {
   const handleFilter = (period) => {
     setSelectedPeriod(period);
 
+    const now = new Date();
     if (period === "thisMonth") {
-      const now = new Date();
       setStartDate(new Date(now.getFullYear(), now.getMonth(), 1));
       setEndDate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
     } else if (period === "lastMonth") {
-      const now = new Date();
       setStartDate(new Date(now.getFullYear(), now.getMonth() - 1, 1));
       setEndDate(new Date(now.getFullYear(), now.getMonth(), 0));
     } else if (period === "last3Months") {
-      const now = new Date();
       setStartDate(new Date(now.getFullYear(), now.getMonth() - 2, 1));
       setEndDate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
     }
   };
 
-    return (
-        <ProtectedRoute>
-        <View style={styles.container}>
-            <Text style={styles.title}>Home Screen</Text>
-            {authToken ? (
-                <Text>User dah login, Token: {authToken.substring(0, 10)}...</Text>
-            ) : (
-                <Text>Belom login</Text>
-            )}
-            <View style={styles.headerContainer}>
-                <View style={styles.logoContainer}>
-                    <Image source={require('../assets/images/logo1.png')} style={styles.logoImage} resizeMode="contain" />
-                    <Image source={require('../assets/images/Wally..png')} style={styles.wallyImage} resizeMode="contain" />
-                </View>
-                <View style={styles.rightHeaderContainer}>
-                    <Image source={require('../assets/images/theme.png')} style={styles.themeIcon} resizeMode="contain" />
-                    <View style={styles.separator} />
-                    <TouchableOpacity onPress={logout}>
-                        <Image source={require('../assets/images/Foto.jpg')} style={styles.profilePic} resizeMode="cover" />
-                    </TouchableOpacity>
-                </View>
-            </View>
+   
   return (
     <SafeAreaView  style={{ flex: 1, backgroundColor: 'white'}}>
      <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
@@ -310,6 +280,9 @@ export default function Index() {
     </SafeAreaView >
   );
 }
+  
+  
+
 
 const styles = StyleSheet.create({
   headerContainer: {
