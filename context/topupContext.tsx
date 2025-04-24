@@ -14,6 +14,11 @@ interface TopupContextType {
   resetTopupData: () => void;
   cardDetails: CardDetails;
   setCardDetails: React.Dispatch<React.SetStateAction<CardDetails>>;
+  accountNumber: any;
+  setAccountNumber: (accountNumber:any) => void;
+  fullName: any;
+  setFullName: (fullName:any) => void;
+
 }
 
 const TopupContext = createContext<TopupContextType | undefined>(undefined);
@@ -22,6 +27,8 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [selectedMethod, setSelectedMethod] = useState<string | null>("Choose Topup Method");
   const [amount, setAmount] = useState('');
   const [cardDetails, setCardDetails] = useState<CardDetails>({ cardNumber: '', expiry: '', cvv: '' });
+  const [accountNumber, setAccountNumber] = useState('');
+  const [fullName, setFullName] = useState('');
 
   const resetTopupData = () => {
     setSelectedMethod("Choose Topup Method");
@@ -37,6 +44,10 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     resetTopupData,
     cardDetails,
     setCardDetails,
+    accountNumber,
+    setAccountNumber,
+    fullName,
+    setFullName
   };
 
   return (

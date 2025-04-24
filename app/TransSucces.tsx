@@ -1,4 +1,3 @@
-import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -28,9 +27,9 @@ const TransSuccessScreen = () => {
     accountNumber,
     amount,
     note,
+    recipientAccount,
     recipientName,
     senderName,
-    senderAccount,
     resetTransferData,
   } = useTransfer();
 
@@ -53,13 +52,13 @@ const TransSuccessScreen = () => {
       <Text style={styles.label}>To</Text>
       <View style={styles.card}>
         <Text style={styles.name}>{recipientName || "-"}</Text>
-        <Text style={styles.account}>{accountNumber || "-"}</Text>
+        <Text style={styles.account}>{recipientAccount || "-"}</Text>
       </View>
 
       <Text style={styles.label}>From</Text>
       <View style={styles.card}>
         <Text style={styles.name}>{senderName || "-"}</Text>
-        <Text style={styles.account}>{senderAccount || "-"}</Text>
+        <Text style={styles.account}>{accountNumber || "-"}</Text>
       </View>
 
       <View style={styles.row}>

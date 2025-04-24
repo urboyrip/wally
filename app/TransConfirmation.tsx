@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Keyboard,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,9 +15,9 @@ const ConfirmationScreen: React.FC = () => {
     accountNumber,
     amount,
     note,
+    recipientAccount,
     recipientName,
     senderName,
-    senderAccount,
   } = useTransfer();
   
 
@@ -35,13 +34,13 @@ const ConfirmationScreen: React.FC = () => {
         <Text style={styles.label}>Recipient</Text>
         <View style={styles.card}>
           <Text style={styles.name}>{recipientName}</Text>
-          <Text style={styles.account}>{accountNumber}</Text>
+          <Text style={styles.account}>{recipientAccount}</Text>
         </View>
 
         <Text style={styles.label}>Source of Fund</Text>
         <View style={styles.card}>
           <Text style={styles.name}>{senderName}</Text>
-          <Text style={styles.account}>{senderAccount}</Text>
+          <Text style={styles.account}>{accountNumber}</Text>
         </View>
 
         <View style={styles.row}>
@@ -65,14 +64,6 @@ const ConfirmationScreen: React.FC = () => {
           onPress={() =>
             router.push({
               pathname: "/InputPIN",
-              params: {
-                recipientAccount: accountNumber,
-                amount: amount,
-                note: note,
-                recipientName: recipientName,
-                senderName: senderName,
-                senderAccount: senderAccount,
-              },
             })
           }
         >

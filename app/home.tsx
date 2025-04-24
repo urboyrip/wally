@@ -2,9 +2,11 @@ import { Text, View, Image, TouchableOpacity, Pressable, Dimensions, StyleSheet 
 import { useState } from "react";
 import { router } from "expo-router";
 import { LinearGradient } from 'expo-linear-gradient';
+import { useAuth } from "@/context/authContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const { width, height } = Dimensions.get('window');
-const basePadding = width * 0.03; // Padding dasar responsif
+const basePadding = width * 0.03;
 const iconSizeSmall = width * 0.05;
 const iconSizeMedium = width * 0.06;
 const iconSizeLarge = width * 0.08;
@@ -13,12 +15,20 @@ const fontSizeMedium = width * 0.045;
 const fontSizeLarge = width * 0.06;
 
 export default function Index() {
+    const { authToken,logout } = useAuth();
     const [showBalance, setShowBalance] = useState(true);
     const [showRecord, setShowRecord] = useState(true);
+    
 
     return (
+        <ProtectedRoute>
         <View style={styles.container}>
-
+            <Text style={styles.title}>Home Screen</Text>
+            {authToken ? (
+                <Text>User dah login, Token: {authToken.substring(0, 10)}...</Text>
+            ) : (
+                <Text>Belom login</Text>
+            )}
             <View style={styles.headerContainer}>
                 <View style={styles.logoContainer}>
                     <Image source={require('../assets/images/logo1.png')} style={styles.logoImage} resizeMode="contain" />
@@ -27,7 +37,7 @@ export default function Index() {
                 <View style={styles.rightHeaderContainer}>
                     <Image source={require('../assets/images/theme.png')} style={styles.themeIcon} resizeMode="contain" />
                     <View style={styles.separator} />
-                    <TouchableOpacity onPress={() => router.push('/Login')}>
+                    <TouchableOpacity onPress={logout}>
                         <Image source={require('../assets/images/Foto.jpg')} style={styles.profilePic} resizeMode="cover" />
                     </TouchableOpacity>
                 </View>
@@ -100,8 +110,11 @@ export default function Index() {
                 </View>
             </View>
         </View>
+        </ProtectedRoute>
     );
 }
+
+
 
 const styles = StyleSheet.create({
     container: {
@@ -116,6 +129,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: basePadding,
         borderBottomColor: "grey",
         paddingVertical: basePadding * 0.66,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 20,
     },
     logoContainer: {
         flexDirection: "row",

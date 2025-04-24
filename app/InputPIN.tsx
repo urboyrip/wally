@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef  } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { Animated } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useTransfer } from "@/context/transferContext";
+import { useAuth } from "@/context/authContext";
 
 interface PinCircleProps {
   filled: boolean;
@@ -25,62 +26,71 @@ const PinScreen = () => {
   const [pin, setPin] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const pinLength = 6;
-  const correctPin = "123456";
   const [fadeAnim] = useState(new Animated.Value(0));
 
   const {
-      recipientName,
-      recipientAccount,
-      senderName,
-      senderAccount,
-      note,
-      amount,
-    } = useLocalSearchParams();
+    accountNumber,
+    amount,
+    note,
+    recipientAccount,
+    recipientName,
+    senderName,
+  } = useTransfer();
+  const { authToken } = useAuth();
   
 
   useEffect(() => {
-    if (pin.length === pinLength) {
-      if (pin === correctPin) {
-        setErrorMessage('');
-        if (Platform.OS !== "web") {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        }
-        router.push({
-          pathname: "/TransSucces",
-          params: {
-            recipientAccount,
-            amount,
-            note,
-            recipientName,
-            senderName,
-            senderAccount,
+    const handleTransfer = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/api/transfer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: 'Bearer ' + authToken
           },
+          body: JSON.stringify({
+            fromAccountnum: accountNumber,
+            toAccountnum: recipientAccount,
+            amount,
+            description: note,
+            pin: pin,
+          }),
         });
-      } else {
-        setErrorMessage("PIN salah");
-        if (Platform.OS !== "web") {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+  
+        const data = await response.json();
+  
+        if (response.ok) {
+          if (Platform.OS !== "web") {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          }
+  
+          router.push({ pathname: "/TransSucces" });
+        } else {
+          setErrorMessage(data.message || "Transfer gagal.");
+          setPin(""); 
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }).start();
         }
-
+      } catch (error) {
+        setErrorMessage("Terjadi kesalahan saat menghubungi server.");
+        setPin(""); 
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 300,
           useNativeDriver: true,
         }).start();
-
-        setTimeout(() => {
-          setPin("");
-          Animated.timing(fadeAnim, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }).start(() => {
-            setErrorMessage('');
-          });
-        }, 1500);
       }
+    };
+  
+    if (pin.length === pinLength) {
+      handleTransfer();
     }
   }, [pin]);
+  
+  
 
   const handleNumberInput = (number: string) => {
     if (pin.length < pinLength) {

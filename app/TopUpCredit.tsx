@@ -9,19 +9,21 @@ import {
   Platform,
   ScrollView,
   Alert,
-  Keyboard
+  Keyboard,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTopup } from "@/context/topupContext";
 import { useState, useEffect } from "react";
+import { useLocalSearchParams } from "expo-router";
 
 const TopUpCreditScreen = () => {
   const { amount, setCardDetails } = useTopup();
-  const [localCardNumber, setLocalCardNumber] = useState("");
-  const [localExpiry, setLocalExpiry] = useState("");
-  const [localCvv, setLocalCvv] = useState("");
+  const [localCardNumber, setLocalCardNumber] = React.useState("");
+  const [localExpiry, setLocalExpiry] = React.useState("");
+  const [localCvv, setLocalCvv] = React.useState("");
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const { balance } = useLocalSearchParams();
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -48,8 +50,15 @@ const TopUpCreditScreen = () => {
       Alert.alert("Peringatan", "Nomor kartu tidak valid.");
       return;
     }
-    if (!localExpiry.trim() || localExpiry.length !== 5 || !localExpiry.includes("/")) {
-      Alert.alert("Peringatan", "Format tanggal kedaluwarsa tidak valid (MM/YY).");
+    if (
+      !localExpiry.trim() ||
+      localExpiry.length !== 5 ||
+      !localExpiry.includes("/")
+    ) {
+      Alert.alert(
+        "Peringatan",
+        "Format tanggal kedaluwarsa tidak valid (MM/YY)."
+      );
       return;
     }
     if (!localCvv.trim() || localCvv.length < 3) {
@@ -57,19 +66,22 @@ const TopUpCreditScreen = () => {
       return;
     }
 
-    setCardDetails({ cardNumber: localCardNumber, expiry: localExpiry, cvv: localCvv });
+    setCardDetails({
+      cardNumber: localCardNumber,
+      expiry: localExpiry,
+      cvv: localCvv,
+    });
     router.push("/TopUpCreditConfirm");
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
-      
     >
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent} 
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -85,7 +97,9 @@ const TopUpCreditScreen = () => {
             <Ionicons name="wallet" size={24} color="#A020F0" />
             <View style={{ marginLeft: 12 }}>
               <Text style={styles.balanceLabel}>Wally Balance</Text>
-              <Text style={styles.balanceAmount}>Rp1.000.000</Text>
+              <Text style={styles.balanceAmount}>
+                {balance !== null ? `Rp${balance}` : "Memuat..."}
+              </Text>
             </View>
           </View>
           <Text style={styles.maxBalance}>Maximum Balance Rp20.000.000</Text>
@@ -97,7 +111,9 @@ const TopUpCreditScreen = () => {
 
           <View style={styles.amountBox}>
             <Text style={styles.labeltopup}>Top Up Amount</Text>
-            <Text style={styles.amountText}>Rp{parseInt(amount).toLocaleString("id-ID")}</Text>
+            <Text style={styles.amountText}>
+              Rp{parseInt(amount).toLocaleString("id-ID")}
+            </Text>
             <Text style={styles.minNote}>Minimum Rp10.000</Text>
           </View>
 
@@ -128,11 +144,11 @@ const TopUpCreditScreen = () => {
             placeholder="XXX"
             keyboardType="number-pad"
           />
-          
+
           <View style={styles.bottomPadding} />
         </View>
       </ScrollView>
-      
+
       <View style={styles.buttonContainer}>
         {!keyboardVisible && (
           <TouchableOpacity style={styles.button} onPress={handleNext}>

@@ -1,20 +1,54 @@
-// DebitCardConfirmationScreen.tsx
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTopup } from "@/context/topupContext";
+import { useAuth } from "@/context/authContext";
 
 const DebitCardConfirmationScreen = () => {
-  const { amount, cardDetails } = useTopup();
-  const { cardNumber, expiry } = cardDetails;
+  const { amount, cardDetails, accountNumber } = useTopup();
+  const { cardNumber, cvv, expiry } = cardDetails;
+  const { authToken } = useAuth();
 
-  const handleConfirmTopup = () => {
-    router.push({
-      pathname: "/TopUpDebitSuccess",
-      params: { amount: amount, cardNumber: cardNumber, expiry: expiry },
-    });
-    console.log("Melakukan top up kartu debit:", cardNumber, expiry, amount);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleConfirmTopup = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/topup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + authToken,
+        },
+        body: JSON.stringify({
+          accountnum: accountNumber,
+          amount: parseInt(amount),
+          method: "Debit",
+          cardNumber: cardNumber,
+          cvv: cvv,
+          expirationDate: expiry,
+        }),
+      });
+
+      const json = await response.json();
+
+      if (response.ok && json.status === "success") {
+        setErrorMessage(""); // reset error
+        router.push({
+          pathname: "/TopUpDebitSuccess",
+          params: { amount: amount, cardNumber: cardNumber, expiry: expiry },
+        });
+        console.log("Top up berhasil:", json);
+      } else {
+        const msg = json.message || "Top up gagal dilakukan.";
+        setErrorMessage(msg);
+        console.error("Top up error:", json);
+      }
+    } catch (error) {
+      const fallback = "Terjadi kesalahan saat menghubungi server.";
+      setErrorMessage(fallback);
+      console.error("Top up error:", error);
+    }
   };
 
   return (
@@ -32,8 +66,10 @@ const DebitCardConfirmationScreen = () => {
         <View style={styles.iconContainer}>
           <Ionicons name="card-outline" size={48} color="#888" />
         </View>
-        <View style={styles.cardDetails}>
-          <Text style={styles.cardNumber}>**** **** **** {cardNumber?.slice(-4)}</Text>
+        <View>
+          <Text style={styles.cardNumber}>
+            **** **** **** {cardNumber?.slice(-4)}
+          </Text>
           <Text style={styles.expiryCvv}>Expiration {expiry}</Text>
           <Text style={styles.expiryCvv}>(CVV)</Text>
         </View>
@@ -41,10 +77,21 @@ const DebitCardConfirmationScreen = () => {
 
       <View style={styles.amountRow}>
         <Text style={styles.amountLabel}>Amount</Text>
-        <Text style={styles.amountValue}>Rp{parseInt(amount).toLocaleString("id-ID")}</Text>
+        <Text style={styles.amountValue}>
+          Rp{parseInt(amount).toLocaleString("id-ID")}
+        </Text>
       </View>
 
-      <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmTopup}>
+      {errorMessage !== "" && (
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        </View>
+      )}
+
+      <TouchableOpacity
+        style={styles.confirmButton}
+        onPress={handleConfirmTopup}
+      >
         <Text style={styles.confirmButtonText}>Confirm</Text>
       </TouchableOpacity>
     </View>
@@ -86,7 +133,6 @@ const styles = StyleSheet.create({
   iconContainer: {
     marginRight: 16,
   },
-  cardDetails: {},
   cardNumber: {
     fontSize: 16,
     fontWeight: "bold",
@@ -113,6 +159,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "#333",
+  },
+  errorBox: {
+    backgroundColor: "#fdecea",
+    borderColor: "#f5c6cb",
+    borderWidth: 1,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: "#a94442",
+    fontSize: 14,
+    textAlign: "center",
   },
   confirmButton: {
     backgroundColor: "#A020F0",

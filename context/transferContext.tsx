@@ -2,18 +2,18 @@
 import React, { createContext, useState, useContext } from 'react';
 
 interface TransferContextType {
-  accountNumber: string;
-  setAccountNumber: (accountNumber: string) => void;
   amount: string;
   setAmount: (amount: string) => void;
   note: string;
   setNote: (note: string) => void;
-  recipientName: string;
-  setRecipientName: (recipientName: string) => void;
-  senderName: string;
-  setSenderName: (senderName: string) => void;
-  senderAccount: string;
-  setSenderAccount: (senderAccount: string) => void;
+  recipientAccount: any;
+  setRecipientAccount: (recipientAccount: any)  => void;
+  recipientName: any;
+  setRecipientName: (recipientName: any)  => void;
+  accountNumber: any;
+  setAccountNumber: (accountNumber:any) => void;
+  senderName: any;
+  setSenderName: (senderName:any) => void;
   resetTransferData: () => void;
 }
 
@@ -23,34 +23,37 @@ export const TransferProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [accountNumber, setAccountNumber] = useState('');
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
+  const [recipientAccount, setRecipientAccount] = useState('');
   const [recipientName, setRecipientName] = useState('');
   const [senderName, setSenderName] = useState('');
-  const [senderAccount, setSenderAccount] = useState('');
 
   const resetTransferData = () => {
     setAccountNumber('');
     setAmount('');
     setNote('');
-    setRecipientName('');
+    setRecipientAccount('');
     setSenderName('');
-    setSenderAccount('');
+    setRecipientName('');
   };
 
   const value: TransferContextType = {
-    accountNumber,
-    setAccountNumber,
     amount,
     setAmount,
     note,
     setNote,
-    recipientName,
+    recipientAccount,
+    setRecipientAccount,
+    accountNumber,
+    setAccountNumber,
+    recipientName, 
     setRecipientName,
-    senderName,
+    senderName, 
     setSenderName,
-    senderAccount,
-    setSenderAccount,
     resetTransferData,
   };
+
+  console.log(recipientAccount);
+  
 
   return (
     <TransferContext.Provider value={value}>

@@ -10,9 +10,56 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
+import { useAuth } from "@/context/authContext";
 
 const LoginScreen = () => {
   const [secure, setSecure] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { setAuthToken } = useAuth();
+
+  const handleLogin = async () => {
+    setErrorMessage(null);
+
+    try {
+      const response = await fetch("http://localhost:8080/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data?.status === "success" && data?.token && data?.accountnum) {
+        console.log(
+          "Login successful:",
+          data.message,
+          "Token:",
+          data.token,
+          "Account Number:",
+          data.accountnum
+        );
+        setAuthToken(data.token);
+
+        setTimeout(() => {
+          router.push("/Home");
+        }, 0);
+        
+      } else {
+        console.error("Login failed:", data?.message);
+        setErrorMessage(data?.message);
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      setErrorMessage("Failed to connect to the server.");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -30,12 +77,19 @@ const LoginScreen = () => {
         Enter your email and password to access your account!
       </Text>
 
-      <TextInput style={styles.input} placeholder="Email" />
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+      />
       <View style={styles.passwordContainer}>
         <TextInput
           style={styles.passwordInput}
           placeholder="Password"
           secureTextEntry={secure}
+          value={password}
+          onChangeText={setPassword}
         />
         <TouchableOpacity onPress={() => setSecure(!secure)}>
           <Ionicons
@@ -46,7 +100,9 @@ const LoginScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/Home')}>
+      {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
+
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
 
@@ -108,7 +164,8 @@ const styles = StyleSheet.create({
   link: {
     color: "#A020F0",
     fontWeight: "bold",
-  },  passwordContainer: {
+  },
+  passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
@@ -120,5 +177,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     fontSize: 16,
   },
-
+  errorText: {
+    color: "red",
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: "center",
+  },
 });

@@ -8,7 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 
 interface PinCircleProps {
@@ -21,42 +21,101 @@ const PinCircle: React.FC<PinCircleProps> = ({ filled }) => (
 
 const CreatePinScreen = () => {
   const [pin, setPin] = useState('');
-  const [confirmPin, setConfirmPin] = useState('');
-  const [stage, setStage] = useState<'create' | 'reenter'>('create');
-  const pinLength = 6;
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [pinCreatedMessage, setPinCreatedMessage] = useState<string | null>(null);
-  const [navigationTimerActive, setNavigationTimerActive] = useState(false);
+    const [confirmPin, setConfirmPin] = useState('');
+    const [stage, setStage] = useState<'create' | 'reenter'>('create');
+    const pinLength = 6;
+    const [pinCreatedMessage, setPinCreatedMessage] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [pinRegistrationMessage, setPinRegistrationMessage] = useState<string | null>(null);
+    const [navigationTimerActive, setNavigationTimerActive] = useState(false);
+    const { accountnum } = useLocalSearchParams();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [hasSubmitted, setHasSubmitted] = useState(false);
+
+
+    const handlePinRegistration = async (pinToRegister: string) => {
+      setPinRegistrationMessage(null);
+
+      if (!accountnum) {
+          console.error("Account number not found.");
+          setPinRegistrationMessage("Account number is missing.");
+          return;
+      }
+
+      console.log("Sending data to /api/pin:", {
+        accountnum: accountnum,
+        pin: pinToRegister,
+      });
+
+      try {
+          const response = await fetch("http://localhost:8080/api/pin", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                
+                accountnum: accountnum,
+                  pin: pinToRegister,
+              }),
+          });
+
+          const data = await response.json();
+
+          if (data?.message === "PIN registered successfully.") {
+              console.log("PIN registered successfully:", data.message);
+              setPinRegistrationMessage(data.message);
+              setTimeout(() => {
+                  router.push('/Login');
+              }, 2000);
+          } else {
+              console.error("PIN registration failed:", data?.message || "Something went wrong.");
+              setPinRegistrationMessage(data?.message || "Failed to register PIN.");
+          }
+      } catch (error) {
+          console.error("Error during PIN registration:", error);
+          setPinRegistrationMessage("Failed to connect to the server to register PIN.");
+      }
+  };
 
   useEffect(() => {
-    if (stage === 'reenter' && confirmPin.length === pinLength) {
-      if (pin === confirmPin) {
-        console.log('PIN berhasil dibuat:', pin);
-        setPinCreatedMessage('PIN berhasil dibuat!');
-        setNavigationTimerActive(true);
-        if (Platform.OS !== 'web') {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        }
-      } else {
-        setErrorMessage('PIN tidak cocok. Silakan coba lagi.');
-        setConfirmPin('');
-        setPinCreatedMessage(null);
-        if (Platform.OS !== 'web') {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        }
+    if (
+      stage === 'reenter' &&
+      confirmPin.length === pinLength &&
+      pin === confirmPin &&
+      !isSubmitting &&
+      !hasSubmitted
+    ) {
+      setIsSubmitting(true);
+      setHasSubmitted(true);
+  
+      console.log('PIN berhasil dibuat:', confirmPin);
+      setPinCreatedMessage('PIN berhasil dibuat!');
+      setNavigationTimerActive(true);
+  
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+  
+      handlePinRegistration(confirmPin).finally(() => {
+        setIsSubmitting(false);
+      });
+    } else if (
+      stage === 'reenter' &&
+      confirmPin.length === pinLength &&
+      pin !== confirmPin
+    ) {
+      setErrorMessage('PIN tidak cocok. Silakan coba lagi.');
+      setConfirmPin('');
+      setPinCreatedMessage(null);
+      setPinRegistrationMessage(null);
+      setHasSubmitted(false);
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     }
-  }, [stage, pin, confirmPin]);
-
-  useEffect(() => {
-    if (navigationTimerActive) {
-      const timer = setTimeout(() => {
-        router.push('/Login');
-      }, 4000); 
-
-      return () => clearTimeout(timer);
-    }
-  }, [navigationTimerActive, router]);
+  }, [stage, pin, confirmPin, isSubmitting, hasSubmitted]);
+  
 
   useEffect(() => {
     if (stage === 'create' && pin.length === pinLength) {
@@ -137,11 +196,11 @@ const CreatePinScreen = () => {
             ))}
         </View>
 
-        {pinCreatedMessage ? (
-          <Text style={styles.errorMessage}>{pinCreatedMessage}</Text>
-        ) : (
-          errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>
-        )}
+        {pinRegistrationMessage && (
+    <Text style={pinRegistrationMessage.includes('berhasil') ? styles.successMessage : styles.errorMessage}>
+        {pinRegistrationMessage}
+    </Text>
+)}
 
         <View style={styles.keyboard}>
           <View style={styles.row}>
@@ -281,6 +340,12 @@ const styles = StyleSheet.create({
     height: 80,
     margin: 5,
   },
+  successMessage: {
+    color: 'green',
+    marginVertical: 20,
+    fontSize: 16,
+    textAlign: 'center',
+},
 });
 
 export default CreatePinScreen;

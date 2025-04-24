@@ -8,48 +8,98 @@ import {
   ScrollView,
   Alert,
   Keyboard,
+  FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTransfer } from "@/context/transferContext";
-
-const WALLY_BALANCE = 1000000;
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/context/authContext";
 
 const TransferScreen: React.FC = () => {
   const {
-    accountNumber,
-    setAccountNumber,
     amount,
     setAmount,
     note,
     setNote,
+    recipientAccount,
+    setRecipientAccount,
     setRecipientName,
+    setAccountNumber,
     setSenderName,
-    setSenderAccount,
   } = useTransfer();
+  const { authToken } = useAuth();
+
   const [isEditingAmount, setIsEditingAmount] = useState<boolean>(false);
   const [keyboardVisible, setKeyboardVisible] = useState<boolean>(false);
+  const [users, setUsers] = useState<
+    { accountnum: string; fullname: string }[]
+  >([]);
+  const [wallyBalance, setWallyBalance] = useState<number>(0);
+
+  // State untuk mengontrol visibilitas dropdown kustom
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  // State untuk menyimpan item penerima yang dipilih untuk tampilan
+  const [selectedRecipient, setSelectedRecipient] = useState<{
+    accountnum: string;
+    fullname: string;
+  } | null>(null);
 
   useEffect(() => {
+    // Fungsi-fungsi fetch data tetap sama
+    const fetchUserMe = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/api/users/me", {
+          headers: {
+            Authorization: 'Bearer ' + authToken
+          },
+        });
+        const result = await response.json();
+        const userData = result.data;
+        setWallyBalance(userData.balance);
+        setAccountNumber(userData.accountnum);
+        setSenderName(userData.fullname);
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+      }
+    };
+
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/api/users/all", {
+          headers: {
+            Authorization: 'Bearer ' + authToken
+          },
+        });
+
+        const data = await response.json();
+        const parsed = data.map((userString: string) => {
+          const [accountnum, fullname] = userString.split(" - ");
+          return { accountnum, fullname };
+        });
+        setUsers(parsed);
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+      }
+    };
+
+    fetchUserMe();
+    fetchUsers();
+
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
-      () => {
-        setKeyboardVisible(true);
-      }
+      () => setKeyboardVisible(true)
     );
     const keyboardDidHideListener = Keyboard.addListener(
       "keyboardDidHide",
-      () => {
-        setKeyboardVisible(false);
-      }
+      () => setKeyboardVisible(false)
     );
 
     return () => {
       keyboardDidShowListener.remove();
       keyboardDidHideListener.remove();
     };
-  }, []);
-
+  }, [authToken]);
 
   const handleAmountChange = (value: string): void => {
     const numericValue = value.replace(/\D/g, "");
@@ -57,10 +107,10 @@ const TransferScreen: React.FC = () => {
   };
 
   const handleNext = (): void => {
-    if (!accountNumber.trim() || accountNumber === "0") {
+    if (!recipientAccount.trim() || recipientAccount === "0") {
       Alert.alert(
         "Peringatan",
-        "Nomor rekening harus diisi dan tidak boleh 0."
+        "Nomor rekening harus dipilih dan tidak boleh 0."
       );
       return;
     }
@@ -75,101 +125,153 @@ const TransferScreen: React.FC = () => {
       return;
     }
 
-    if (numericAmount > WALLY_BALANCE) {
+    if (numericAmount > wallyBalance) {
       Alert.alert(
         "Peringatan",
-        `Jumlah transfer melebihi saldo Anda (Rp${WALLY_BALANCE.toLocaleString(
+        `Jumlah transfer melebihi saldo Anda (Rp${wallyBalance.toLocaleString(
           "id-ID"
         )}).`
       );
       return;
     }
 
-    setRecipientName("Ahmad Jaelani");
-    setSenderName("Sandy Yuyu");
-    setSenderAccount("111888111888");
-
     router.push("/TransConfirmation");
   };
 
+  // Fungsi untuk menampilkan/menyembunyikan dropdown kustom
+  const toggleDropdown = () => {
+    setIsDropdownVisible(!isDropdownVisible);
+  };
+
+  // Fungsi untuk menangani pemilihan item dari dropdown kustom
+  const handleSelectRecipient = (user: {
+    accountnum: string;
+    fullname: string;
+  }) => {
+    setRecipientAccount(user.accountnum);
+    setRecipientName(user.fullname);
+    setSelectedRecipient(user);
+    setIsDropdownVisible(false);
+  };
+
+  // Komponen untuk merender setiap item dalam dropdown
+  const renderRecipientItem = ({
+    item,
+  }: {
+    item: { accountnum: string; fullname: string };
+  }) => (
+    <TouchableOpacity
+      style={styles.dropdownItem}
+      onPress={() => handleSelectRecipient(item)}
+    >
+      <Text style={styles.dropdownItemText}>
+        {`${item.fullname} (${item.accountnum})`}
+      </Text>
+    </TouchableOpacity>
+  );
+
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Transfer</Text>
-        </View>
+    <ProtectedRoute>
+      <View style={styles.container}>
+        <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={24} color="#000" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Transfer</Text>
+          </View>
 
-        <Text style={styles.label}>Input Account Number</Text>
-        <TextInput
-          style={styles.input}
-          value={accountNumber}
-          onChangeText={setAccountNumber}
-          placeholder="e.g. 1234567890"
-          keyboardType="number-pad"
-        />
-
-        <Text style={styles.label}>Source of Fund</Text>
-        <View style={styles.sourceBox}>
-          <Ionicons name="wallet" size={24} color="#A020F0" />
-          <View style={{ marginLeft: 12 }}>
-            <Text>Wally Balance</Text>
-            <Text style={{ fontWeight: "bold" }}>
-              Rp{WALLY_BALANCE.toLocaleString("id-ID")}
+          <Text style={styles.label}>Select Recipient Account</Text>
+          
+          <TouchableOpacity
+            style={styles.dropdownButton} 
+            onPress={toggleDropdown}
+          >
+            <Text
+              style={
+                selectedRecipient
+                  ? styles.dropdownText 
+                  : [styles.dropdownText, { color: "#999" }] 
+              }
+            >
+              {selectedRecipient
+                ? `${selectedRecipient.fullname} (${selectedRecipient.accountnum})`
+                : "Choose Recipient Account"}
             </Text>
-          </View>
-        </View>
+            <Ionicons
+              name={isDropdownVisible ? "chevron-up" : "chevron-down"}
+              size={20}
+              color="#A020F0"
+            />
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.amountBox}
-          onPress={() => setIsEditingAmount(true)}
-          activeOpacity={1}
-        >
-          <Text style={styles.label}>Transfer Amount</Text>
-          <View style={styles.amountContainer}>
-            <Text style={styles.rupiahPrefix}>Rp</Text>
-            {isEditingAmount ? (
-              <TextInput
-                autoFocus
-                style={styles.amountInput}
-                value={amount.replace(/\D/g, "")}
-                onChangeText={handleAmountChange}
-                placeholder="0"
-                keyboardType="numeric"
-                onBlur={() => setIsEditingAmount(false)}
+          {isDropdownVisible && (
+            <View style={styles.dropdownContainer}>
+              <FlatList
+                data={users}
+                keyExtractor={(item) => item.accountnum}
+                renderItem={renderRecipientItem}
               />
-            ) : (
-              <Text style={styles.amountText}>
-                {amount ? parseInt(amount, 10).toLocaleString("id-ID") : "0"}
+            </View>
+          )}
+
+          <Text style={styles.label}>Source of Fund</Text>
+          <View style={styles.sourceBox}>
+            <Ionicons name="wallet" size={24} color="#A020F0" />
+            <View style={{ marginLeft: 12 }}>
+              <Text>Wally Balance</Text>
+              <Text style={{ fontWeight: "bold" }}>
+                Rp{wallyBalance.toLocaleString("id-ID")}
               </Text>
-            )}
+            </View>
           </View>
 
-          <Text style={styles.minNote}>Minimum Rp10.000</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.amountBox}
+            onPress={() => setIsEditingAmount(true)}
+            activeOpacity={1}
+          >
+            <Text style={styles.label}>Transfer Amount</Text>
+            <View style={styles.amountContainer}>
+              <Text style={styles.rupiahPrefix}>Rp</Text>
+              {isEditingAmount ? (
+                <TextInput
+                  autoFocus
+                  style={styles.amountInput}
+                  value={amount.replace(/\D/g, "")}
+                  onChangeText={handleAmountChange}
+                  placeholder="0"
+                  keyboardType="numeric"
+                  onBlur={() => setIsEditingAmount(false)}
+                />
+              ) : (
+                <Text style={styles.amountText}>
+                  {amount ? parseInt(amount, 10).toLocaleString("id-ID") : "0"}
+                </Text>
+              )}
+            </View>
+            <Text style={styles.minNote}>Minimum Rp10.000</Text>
+          </TouchableOpacity>
 
-        <Text style={styles.label}>Notes (Optional)</Text>
-        <TextInput
-          style={styles.input}
-          value={note}
-          onChangeText={setNote}
-          placeholder="e.g. For lunch payment"
-        />
-        <View style={{ height: 80 }} />
-      </ScrollView>
+          <Text style={styles.label}>Notes (Optional)</Text>
+          <TextInput
+            style={styles.input}
+            value={note}
+            onChangeText={setNote}
+            placeholder="e.g. For lunch payment"
+          />
+          <View style={{ height: 80 }} />
+        </ScrollView>
 
-      {!keyboardVisible && (
-        <TouchableOpacity style={styles.absoluteButton} onPress={handleNext}>
-          <Text style={styles.buttonText}>Next</Text>
-        </TouchableOpacity>
-      )}
-    </View>
+        {!keyboardVisible && (
+          <TouchableOpacity style={styles.absoluteButton} onPress={handleNext}>
+            <Text style={styles.buttonText}>Next</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </ProtectedRoute>
   );
 };
-
-export default TransferScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -259,4 +361,36 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
+  dropdownButton: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    paddingVertical: 12,
+  },
+  dropdownText: {
+    fontSize: 16,
+  },
+  dropdownContainer: {
+    borderWidth: 1,
+    borderColor: "#eee",
+    borderRadius: 4,
+    marginTop: 4,
+    backgroundColor: "#fff",
+    elevation: 2,
+    maxHeight: 200,
+  },
+  dropdownItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  dropdownItemText: {
+    fontSize: 16,
+    color: "#000",
+  },
 });
+
+
+
+export default TransferScreen;
