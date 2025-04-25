@@ -5,13 +5,17 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from "@/context/authContext";
-import ProtectedRoute from "@/components/ProtectedRoute";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import Svg, { Circle, G, Text as SvgText } from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
+type UserData = {
+  fullname: string;
+  accountnum: string;
+  balance: number;
+};
 
 export default function Index() {
   const [showBalance, setShowBalance] = useState(true);
@@ -19,8 +23,10 @@ export default function Index() {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [selectedPeriod, setSelectedPeriod] = useState("thisMonth");
-  const [dataUser, setDataUser] = useState("");
+  const [dataUser, setDataUser] = useState<UserData | null>(null);
   const { authToken, logout } = useAuth();
+  const [financialRecords, setFinancialRecords] = useState([]);
+  const [summary, setSummary] = useState({ totalIncome: 0, totalExpense: 0 });
 
   const income = 500000;
   const expense = 300000;
@@ -32,25 +38,42 @@ export default function Index() {
   const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUserData = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/users/7994149544', {
+        const response = await fetch('http://localhost:8080/api/users/me', {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
-            token: "eyJhbGciOiJIUzM4NCJ9..." // sebaiknya simpan di .env
+            Authorization: 'Bearer ' + authToken,
           },
         });
-
-        const data = await response.json();
-        setDataUser(data);
-        console.log(data);
+  
+        const result = await response.json();
+        setDataUser(result.data);
+        console.log("User Data:", result.data);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching user data:", error);
       }
     };
-
-    fetchData();
+  
+    const fetchFinancialRecords = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/financial-records', {
+          method: 'GET',
+          headers: {
+            Authorization: 'Bearer ' + authToken,
+          },
+        });
+  
+        const result = await response.json();
+        setFinancialRecords(result.data);
+        console.log("Financial Records:", result.data);
+      } catch (error) {
+        console.error("Error fetching financial records:", error);
+      }
+    };
+  
+    fetchUserData();
+    fetchFinancialRecords();
   }, []);
 
   useEffect(() => {
@@ -69,19 +92,44 @@ export default function Index() {
     setSelectedPeriod(period);
 
     const now = new Date();
-    if (period === "thisMonth") {
+    if (period === "this_month") {
       setStartDate(new Date(now.getFullYear(), now.getMonth(), 1));
       setEndDate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
-    } else if (period === "lastMonth") {
+    } else if (period === "last_month") {
       setStartDate(new Date(now.getFullYear(), now.getMonth() - 1, 1));
       setEndDate(new Date(now.getFullYear(), now.getMonth(), 0));
-    } else if (period === "last3Months") {
+    } else if (period === "three_month_ago") {
       setStartDate(new Date(now.getFullYear(), now.getMonth() - 2, 1));
       setEndDate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
     }
   };
 
-   
+  const fetchSummary = async (period) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/transactions/summary/${period}`, {
+        method: 'GET',
+        headers: {
+          Authorization: 'Bearer ' + authToken,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      setSummary(result.data); // Simpan data summary ke state
+      console.log(`Summary for ${period}:`, result.data);
+    } catch (error) {
+      console.error(`Error fetching summary for ${period}:`, error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSummary(selectedPeriod);
+  }, [selectedPeriod]);
+
   return (
     <SafeAreaView  style={{ flex: 1, backgroundColor: 'white'}}>
      <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
@@ -100,18 +148,18 @@ export default function Index() {
       </View>
 
       <View style={{ paddingHorizontal: 15, marginTop: 15 }}>
-        <Text style={{ color: "#3A1D6E", fontWeight: "600", fontSize: 25 }}>Welcome, Sandy!</Text>
+        <Text style={{ color: "#3A1D6E", fontWeight: "600", fontSize: 25 }}> Welcome, {dataUser?.fullname?.split(' ')[0] || "User"}!</Text>
         <Text style={{ color: "black", fontWeight: "100", fontSize: 15 }}>Your wallet’s all set and secure. Let’s get started.</Text>
       </View>
 
       <LinearGradient colors={["#9B30FF", "#3A1D6E"]} style={styles.balanceCard}>
         <View style={styles.accountRow}>
           <Text style={styles.whiteText}>Account Number:</Text>
-          <Text style={[styles.whiteText, { fontWeight: '500' }]}>111888111888</Text>
+          <Text style={[styles.whiteText, { fontWeight: '500' }]}>{dataUser?.accountnum || "Loading..."}</Text>
         </View>
         <Text style={styles.whiteText}>Total Balance</Text>
         <View style={styles.balanceRow}>
-          <Text style={styles.balanceText}>{showBalance ? "Rp 1.000.000,00" : "************"}</Text>
+          <Text style={styles.balanceText}>{showBalance ? `Rp ${dataUser?.balance?.toLocaleString('id-ID') || "0"}` : "************"}</Text>
           <TouchableOpacity onPress={() => setShowBalance(!showBalance)}>
             <Ionicons
                 name={showBalance ? "eye-off" : "eye"}
@@ -207,23 +255,34 @@ export default function Index() {
               <Image source={require('../assets/images/login.png')} style={styles.cardIcon} />
               <Text style={styles.cardLabel}>Income</Text>
             </View>
-            <Text style={styles.cardAmount}>{showRecord ? `Rp${income.toLocaleString('id-ID')}` : "******"}</Text>
+            <Text style={styles.cardAmount}>
+              {showRecord ? `Rp${summary.totalIncome.toLocaleString('id-ID')}` : "******"}
+            </Text>
           </View>
           <View style={styles.recordCard}>
             <View style={styles.cardRow}>
               <Image source={require('../assets/images/logout.png')} style={styles.cardIcon} />
               <Text style={styles.cardLabel}>Expense</Text>
             </View>
-            <Text style={styles.cardAmount}>{showRecord ? `Rp${expense.toLocaleString('id-ID')}` : "******"}</Text>
+            <Text style={styles.cardAmount}>
+              {showRecord ? `Rp${summary.totalExpense.toLocaleString('id-ID')}` : "******"}
+            </Text>
           </View>
         </View>
 
         <View style={styles.differenceRow}>
           <View>
             <Text style={styles.differenceLabel}>Difference</Text>
-            <Text style={styles.differenceAmount}>{showRecord ? "Rp200.000" : "******"}</Text>
+            <Text style={styles.differenceAmount}>
+              {showRecord
+                ? `Rp${(summary.totalIncome - summary.totalExpense).toLocaleString('id-ID')}`
+                : "******"}
+            </Text>
           </View>
-          <Pressable onPress={() => router.push('/transactions')} style={({ pressed }) => [styles.seeDetailsRow, pressed && { opacity: 0.6 }] }>
+          <Pressable
+            onPress={() => router.push('/Transactions')}
+            style={({ pressed }) => [styles.seeDetailsRow, pressed && { opacity: 0.6 }]}
+          >
             <Text style={styles.seeDetailsText}>See Details</Text>
             <Image source={require('../assets/images/back.png')} style={styles.seeDetailsIcon} />
           </Pressable>

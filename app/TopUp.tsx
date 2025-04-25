@@ -14,7 +14,6 @@ import { router } from "expo-router";
 import { useTopup } from "@/context/topupContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/context/authContext";
-import { useLocalSearchParams } from "expo-router";
 
 
 const TopupScreen = () => {

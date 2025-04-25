@@ -1,74 +1,71 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet } from 'react-native';
 import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from "expo-router";
-
-const DATA = {
-  income: [
-    { id: '1', date: '20 April 2025', type: 'Topup', code: 'TUQR20250420 - ROGER RR', amount: 'Rp50.000' },
-    { id: '2', date: '19 April 2025', type: 'Topup', code: 'TUCC20250419 - ROGER RR', amount: 'Rp50.000' },
-    { id: '3', date: '18 April 2025', type: 'Transfer', code: 'TRF20250418 - AHMAD JAELANI', amount: 'Rp50.000' },
-    { id: '4', date: '18 April 2025', type: 'Topup', code: 'TUQR20250418 - ROGER RR', amount: 'Rp50.000' },
-  ],
-  expense: [
-    { id: '5', date: '20 April 2025', type: 'Transfer', code: 'TRF20250420 - LAILA LALILI', amount: 'Rp50.000' },
-    { id: '6', date: '18 April 2025', type: 'Transfer', code: 'TRF20250418 - KIKO RAMSIYAH', amount: 'Rp50.000' },
-    { id: '7', date: '16 April 2025', type: 'Transfer', code: 'TRF20250416 - LIYANDA WINKY', amount: 'Rp50.000' },
-    { id: '8', date: '15 April 2025', type: 'Transfer', code: 'TRF20250415 - KIKO RAMSIYAH', amount: 'Rp50.000' },
-    { id: '9', date: '11 April 2025', type: 'Transfer', code: 'TRF20250411 - KIKO RAMSIYAH', amount: 'Rp50.000' },
-  ]
-};
-
-const tabs = ['income', 'expense'];
+import { useAuth } from "@/context/authContext";
 
 const iconMap = {
-  Transfer: require('../assets/images/transfer.png'),
-  Topup: require('../assets/images/topup.png'),
+  income: require('../assets/images/topup.png'),
+  expense: require('../assets/images/transfer.png'),
 };
 
 const FinancialRecordsScreen = () => {
+  const [transactions, setTransactions] = useState([]);
   const [activeTab, setActiveTab] = useState('expense');
-  const [startDate, setStartDate] = useState(new Date(2025, 3, 1));
-  const [endDate, setEndDate] = useState(new Date(2025, 3, 30));
-  const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
-  const [isStartPicker, setIsStartPicker] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const { authToken, logout } = useAuth();
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/transactions/me', {
+          method: 'GET',
+          headers: {
+            Authorization: 'Bearer ' + authToken,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        setTransactions(result.data.transactions); // Simpan data transaksi ke state
+        console.log("Transactions:", result.data.transactions);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      } finally {
+        setLoading(false); // Set loading selesai
+      }
+    };
+
+    fetchTransactions();
+  }, []);
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
-      <Text style={styles.date}>{item.date}</Text>
+      <Text style={styles.date}>{new Date(item.dateTime).toLocaleDateString('id-ID')}</Text>
       <View style={styles.transactionRow}>
         <Image source={iconMap[item.type]} style={styles.icon} />
         <View style={styles.transactionDetails}>
-          <Text style={styles.type}>{item.type}</Text>
-          <Text style={styles.code}>{item.code}</Text>
+          <Text style={styles.type}>{item.fromTo}</Text>
+          <Text style={styles.code}>{item.description}</Text>
         </View>
-        <Text style={styles.amount}>{item.amount}</Text>
+        <Text style={styles.amount}>
+          {item.type === 'income' ? '+' : '-'}Rp {item.amount.toLocaleString('id-ID')}
+        </Text>
       </View>
     </View>
   );
 
-  const handleDateChange = (event, selectedDate) => {
-    setIsDatePickerVisible(false);
-    if (selectedDate) {
-      if (isStartPicker) {
-        setStartDate(selectedDate);
-        const maxEndDate = new Date(selectedDate);
-        maxEndDate.setDate(maxEndDate.getDate() + 30);
-        if (endDate > maxEndDate) {
-          setEndDate(maxEndDate);
-        }
-      } else {
-        const maxEndDate = new Date(startDate);
-        maxEndDate.setDate(maxEndDate.getDate() + 30);
-        if (selectedDate <= maxEndDate) {
-          setEndDate(selectedDate);
-        } else {
-          alert('End date cannot exceed 30 days from the start date.');
-        }
-      }
-    }
-  };
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -77,48 +74,8 @@ const FinancialRecordsScreen = () => {
       </TouchableOpacity>
       <Text style={styles.header}>Your Financial Records</Text>
 
-      <View style={styles.dateFilterContainer}>
-        <View>
-          <Text style={styles.dateFilterLabel}>Current Report Period</Text>
-          <Text style={styles.dateFilterValue}>
-            {startDate.toLocaleDateString('id-ID')} - {endDate.toLocaleDateString('id-ID')}
-          </Text>
-        </View>
-        <View style={{ flexDirection: 'row', gap: 10 }}>
-          <TouchableOpacity
-            onPress={() => {
-              setIsStartPicker(true);
-              setIsDatePickerVisible(true);
-            }}
-            style={styles.calendarButton}
-          >
-            <Ionicons name="calendar" size={24} color="#9B30FF" />
-            <Text style={styles.calendarText}>Start</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setIsStartPicker(false);
-              setIsDatePickerVisible(true);
-            }}
-            style={styles.calendarButton}
-          >
-            <Ionicons name="calendar" size={24} color="#9B30FF" />
-            <Text style={styles.calendarText}>End</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {isDatePickerVisible && (
-        <DateTimePicker
-          value={isStartPicker ? startDate : endDate}
-          mode="date"
-          display="default"
-          onChange={handleDateChange}
-        />
-      )}
-
       <View style={styles.tabContainer}>
-        {tabs.map((tab) => (
+        {['income', 'expense'].map((tab) => (
           <TouchableOpacity
             key={tab}
             style={[styles.tab, activeTab === tab && styles.activeTab]}
@@ -131,8 +88,8 @@ const FinancialRecordsScreen = () => {
       </View>
 
       <FlatList
-        data={DATA[activeTab]}
-        keyExtractor={(item) => item.id}
+        data={transactions.filter((item) => item.type === activeTab)} // Filter berdasarkan tab
+        keyExtractor={(item) => item.id.toString()} // Gunakan ID dari API
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
@@ -144,25 +101,6 @@ const FinancialRecordsScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 20, backgroundColor: '#fff', padding: 24 },
   header: { fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
-  dateFilterContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 12,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  dateFilterLabel: { fontSize: 12, color: '#333' },
-  dateFilterValue: { fontSize: 14, fontWeight: 'bold', color: '#9B30FF' },
-  calendarButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    padding: 8,
-    borderRadius: 8,
-  },
-  calendarText: { marginLeft: 8, color: '#9B30FF', fontWeight: 'bold' },
   tabContainer: { flexDirection: 'row', justifyContent: 'center', marginBottom: 20, gap: 10 },
   tab: { paddingVertical: 8, paddingHorizontal: 16, backgroundColor: '#eee', borderRadius: 20 },
   activeTab: { backgroundColor: '#9B30FF', borderWidth: 1, borderColor: '#000' },
@@ -176,6 +114,7 @@ const styles = StyleSheet.create({
   type: { fontWeight: 'bold', fontSize: 14 },
   code: { color: '#333' },
   amount: { color: '#9B30FF', fontWeight: 'bold' },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });
 
 export default FinancialRecordsScreen;
