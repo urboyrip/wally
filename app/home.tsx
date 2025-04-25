@@ -36,6 +36,7 @@ export default function Index() {
   const progress = (expense / income) * 100;
   const animatedOffset = useRef(new Animated.Value(circleCircumference)).current;
   const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+  
 
   useEffect(() => {
     const fetchUserData = async () => {
