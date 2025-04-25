@@ -46,7 +46,6 @@ const TransferScreen: React.FC = () => {
   } | null>(null);
 
   useEffect(() => {
-    // Fungsi-fungsi fetch data tetap sama
     const fetchUserMe = async () => {
       try {
         const response = await fetch("http://localhost:8080/api/users/me", {
