@@ -33,7 +33,7 @@ const CreditCardConfirmationScreen = () => {
       const json = await response.json();
 
       if (response.ok && json.status === "success") {
-        setErrorMessage(""); // reset error
+        setErrorMessage("");
         router.push({
           pathname: "/TopUpDebitSuccess",
           params: { amount: amount, cardNumber: cardNumber, expiry: expiry },

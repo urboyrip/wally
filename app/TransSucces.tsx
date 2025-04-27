@@ -62,11 +62,6 @@ const TransSuccessScreen = () => {
       </View>
 
       <View style={styles.row}>
-        <Text style={styles.leftText}>Transaction ID</Text>
-        <Text style={styles.rightText}>{transactionId}</Text>
-      </View>
-
-      <View style={styles.row}>
         <Text style={styles.leftText}>Notes</Text>
         <Text style={styles.rightText}>{note || "-"}</Text>
       </View>

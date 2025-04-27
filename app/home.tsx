@@ -31,9 +31,9 @@ export default function Index() {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [selectedPeriod, setSelectedPeriod] = useState("thisMonth");
+  const [selectedPeriodText, setSelectedPeriodText] = useState<string>("");
   const [dataUser, setDataUser] = useState<UserData | null>(null);
-  const { authToken, logout } = useAuth();
-  const [financialRecords, setFinancialRecords] = useState([]);
+  const { authToken } = useAuth();
   const [summary, setSummary] = useState({ totalIncome: 0, totalExpense: 0 });
 
   const radius = 70;
@@ -122,47 +122,76 @@ export default function Index() {
     }
   };
 
+  const formatMonthYear = (date: Date) => {
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+  };
+
   const handleFilter = async (period: string) => {
     setSelectedPeriod(period);
 
     const now = new Date();
+    let text = "";
 
     if (period === "thisMonth") {
       setStartDate(new Date(now.getFullYear(), now.getMonth(), 1));
       setEndDate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+      text = formatMonthYear(now);
       await fetchSummaryThisMonth();
     } else if (period === "lastMonth") {
-      setStartDate(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      setStartDate(lastMonth);
       setEndDate(new Date(now.getFullYear(), now.getMonth(), 0));
+      text = formatMonthYear(lastMonth);
       await fetchSummaryLastMonth();
     } else if (period === "last3Months") {
-      setStartDate(new Date(now.getFullYear(), now.getMonth() - 2, 1));
+      const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+      setStartDate(threeMonthsAgo);
       setEndDate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+      text = formatMonthYear(threeMonthsAgo);
       await fetchSummaryLast3Months();
     }
+
+    setSelectedPeriodText(text);
   };
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/users/me", {
+        const userResponse = await fetch("http://localhost:8080/api/users/me", {
           method: "GET",
           headers: {
             Authorization: "Bearer " + authToken,
           },
         });
 
-        const result = await response.json();
-        setDataUser(result.data);
-        console.log("User Data:", result.data);
+        const userResult = await userResponse.json();
+        setDataUser(userResult.data);
+        console.log("User Data:", userResult.data);
+
+        await handleFilter("thisMonth");
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
-    fetchUserData();
-    handleFilter("thisMonth");
+    fetchData();
+  }, []);
 
+  useEffect(() => {
     const targetOffset = showRecord
       ? circleCircumference * (1 - progress / 100)
       : circleCircumference;
@@ -172,8 +201,7 @@ export default function Index() {
       duration: 500,
       useNativeDriver: false,
     }).start();
-  }, []);
-
+  }, [summary, showRecord]);
 
   return (
     <ProtectedRoute>
@@ -401,7 +429,6 @@ export default function Index() {
                 />
               </Pressable>
             </View>
-
             <View
               style={{
                 alignItems: "center",
@@ -409,6 +436,9 @@ export default function Index() {
                 marginTop: 20,
               }}
             >
+              <Text style={{ marginTop: 10, fontWeight: "bold", fontSize: 18 }}>
+                {selectedPeriodText}
+              </Text>
               <Svg width={180} height={180}>
                 <G rotation="-90" origin="90,90">
                   <Circle
@@ -451,9 +481,6 @@ export default function Index() {
                   Expense
                 </SvgText>
               </Svg>
-              <Text style={{ marginTop: 10, fontWeight: "bold" }}>
-                April 2025
-              </Text>
             </View>
           </View>
         </ScrollView>

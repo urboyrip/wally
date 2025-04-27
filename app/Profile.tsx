@@ -1,14 +1,51 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useAuth } from "@/context/authContext";
+
+type UserData = {
+  fullname: string;
+  accountnum: string;
+  email?: string;        
+  phoneNumber?: string;  
+};
 
 const ProfileScreen = () => {
-  const user = {
-    fullName: "Sandy Yuyu",
-    email: "sandy.yuyu@gmail.com",
-    phoneNumber: "081588844488",
-  };
+  const { authToken, logout } = useAuth();
+  const [user, setUser] = useState<UserData>({
+    fullname: '',
+    accountnum: '',
+    email: '',
+    phoneNumber: '',
+  });
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/api/users/me", {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + authToken,
+          },
+        });
+
+        const result = await response.json();
+        if (result && result.data) {
+          setUser({
+            fullname: result.data.fullname,
+            accountnum: result.data.accountnum,
+            email: result.data.email,
+            phoneNumber:  result.data.phone
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -21,15 +58,17 @@ const ProfileScreen = () => {
 
       <View style={styles.profileCard}>
         <Ionicons name="person-circle" size={80} color="#A020F0" />
-        <Text style={styles.name}>{user.fullName}</Text>
-        <Text style={styles.email}>{user.email}</Text>
-        <Text style={styles.phone}>{user.phoneNumber}</Text>
+        <Text style={styles.name}>{user.fullname}</Text>
+        <Text style={styles.email}>Account Number: {user.accountnum}</Text>
+        <Text style={styles.email}>Email : {user.email}</Text>
+        <Text style={styles.email}>Phone Number : {user.phoneNumber}</Text>
+
         <TouchableOpacity onPress={() => router.push("/EditProfile")}>
           <Text style={styles.editLink}>Edit Profile</Text>
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={() => router.push("/Login")}>
+      <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
     </View>
@@ -37,6 +76,7 @@ const ProfileScreen = () => {
 };
 
 export default ProfileScreen;
+
 
 const styles = StyleSheet.create({
   container: {

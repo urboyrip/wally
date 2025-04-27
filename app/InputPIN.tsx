@@ -137,13 +137,6 @@ const PinScreen = () => {
           </Animated.Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.forgetPinButton}
-          onPress={() => console.log("Forget PIN pressed")}
-        >
-          <Text style={styles.forgetPinText}>Forget PIN?</Text>
-        </TouchableOpacity>
-
         <View style={styles.keyboard}>
           <View style={styles.row}>
             {[1, 2, 3].map((num) => (
@@ -248,14 +241,7 @@ const styles = StyleSheet.create({
     color: "#FFD700",
     marginVertical: 10,
   },
-  forgetPinButton: {
-    marginBottom: 40,
-    marginTop: 10,
-  },
-  forgetPinText: {
-    color: "#ddd",
-    fontSize: 16,
-  },
+  
   keyboard: {
     marginTop: 20,
     gap: 10,

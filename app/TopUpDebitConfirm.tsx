@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTopup } from "@/context/topupContext";
@@ -33,7 +33,7 @@ const DebitCardConfirmationScreen = () => {
       const json = await response.json();
 
       if (response.ok && json.status === "success") {
-        setErrorMessage(""); // reset error
+        setErrorMessage("");
         router.push({
           pathname: "/TopUpDebitSuccess",
           params: { amount: amount, cardNumber: cardNumber, expiry: expiry },

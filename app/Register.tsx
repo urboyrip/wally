@@ -58,7 +58,7 @@ const RegisterScreen = () => {
 
         const data = await response.json();
 
-        if (data.status === "success" && data.accountnum) {
+        if (data.accountnum && data.message === "Proceed to PIN entry.") {
           console.log("Registration successful:", data.message, "Account Number:", data.accountnum);
           setSuccessMessage(data.message);
   

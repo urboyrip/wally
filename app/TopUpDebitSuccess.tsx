@@ -17,7 +17,6 @@ const TopupDebitSuccessScreen = () => {
     hour: "2-digit",
     minute: "2-digit",
   });
-  const referenceNumber = `TUDP${Date.now().toString().slice(-8)}`;
 
   const handleBackToHome = () => {
     resetTopupData();
@@ -51,10 +50,6 @@ const TopupDebitSuccessScreen = () => {
             <Text style={styles.expiryCvv}>Expiration {expiry}</Text>
             <Text style={styles.expiryCvv}>(CVV)</Text>
           </View>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Reference Number</Text>
-          <Text style={styles.infoValue}>{referenceNumber}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Amount</Text>

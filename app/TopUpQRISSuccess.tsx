@@ -17,7 +17,6 @@ const TopUpQRISSuccessScreen = () => {
     hour: "2-digit",
     minute: "2-digit",
   });
-  const referenceNumber = `TUQR${Date.now().toString().slice(-8)}`; // Generate ID referensi QRIS
 
   const handleBackToHome = () => {
     resetTopupData();
@@ -40,10 +39,6 @@ const TopUpQRISSuccessScreen = () => {
 
       <View style={styles.detailCard}>
         <Text style={styles.detailTitle}>QRIS Topup</Text>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Reference Number</Text>
-          <Text style={styles.infoValue}>{referenceNumber}</Text>
-        </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Amount</Text>
           <Text style={styles.infoValue}>

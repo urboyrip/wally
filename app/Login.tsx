@@ -37,14 +37,6 @@ const LoginScreen = () => {
       const data = await response.json();
 
       if (data?.status === "success" && data?.token && data?.accountnum) {
-        console.log(
-          "Login successful:",
-          data.message,
-          "Token:",
-          data.token,
-          "Account Number:",
-          data.accountnum
-        );
         setAuthToken(data.token);
 
         setTimeout(() => {

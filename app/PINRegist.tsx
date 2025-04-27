@@ -62,7 +62,7 @@ const CreatePinScreen = () => {
 
           const data = await response.json();
 
-          if (data?.message === "PIN registered successfully.") {
+          if (data?.message === "Registration and PIN setup successful.") {
               console.log("PIN registered successfully:", data.message);
               setPinRegistrationMessage(data.message);
               setTimeout(() => {
