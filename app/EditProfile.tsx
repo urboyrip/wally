@@ -1,13 +1,52 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useAuth } from "@/context/authContext";
+
+type UserData = {
+  fullname: string;
+  email?: string;        
+  phoneNumber?: string;  
+};
 
 const EditProfileScreen = () => {
+  const {authToken} = useAuth();
   const [name, setName] = useState("Sandy Yuyu");
   const [email, setEmail] = useState("sandy.yuyu@gmail.com");
   const [phone, setPhone] = useState("081588844488");
+  const [user, setUser] = useState<UserData>({
+      fullname: '',
+      email: '',
+      phoneNumber: '',
+    });
 
+  useEffect(() => {
+      const fetchUserData = async () => {
+        try {
+          const response = await fetch("http://localhost:8080/api/users/me", {
+            method: "GET",
+            headers: {
+              Authorization: "Bearer " + authToken,
+            },
+          });
+  
+          const result = await response.json();
+          if (result && result.data) {
+            setUser({
+              fullname: result.data.fullname,
+              email: result.data.email,
+              phoneNumber:  result.data.phone
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+  
+      fetchUserData();
+    }, []);
+  
   const handleSave = () => {
     router.back();
   };
@@ -27,14 +66,14 @@ const EditProfileScreen = () => {
         <Text style={styles.label}>Full Name</Text>
         <TextInput
           style={styles.input}
-          value={name}
+          value={user.fullname}
           onChangeText={setName}
         />
 
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}
-          value={email}
+          value={user.email}
           onChangeText={setEmail}
           keyboardType="email-address"
         />
@@ -42,7 +81,7 @@ const EditProfileScreen = () => {
         <Text style={styles.label}>Phone Number</Text>
         <TextInput
           style={styles.input}
-          value={phone}
+          value={user.phoneNumber}
           onChangeText={setPhone}
           keyboardType="phone-pad"
         />
