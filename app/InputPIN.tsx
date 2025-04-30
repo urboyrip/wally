@@ -33,8 +33,6 @@ const PinScreen = () => {
     amount,
     note,
     recipientAccount,
-    recipientName,
-    senderName,
   } = useTransfer();
   const { authToken } = useAuth();
   
@@ -42,7 +40,7 @@ const PinScreen = () => {
   useEffect(() => {
     const handleTransfer = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/transfer", {
+        const response = await fetch("https://kelompok5.serverku.org/api/transfer", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

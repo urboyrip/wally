@@ -48,7 +48,7 @@ const TransferScreen: React.FC = () => {
   useEffect(() => {
     const fetchUserMe = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/users/me", {
+        const response = await fetch("https://kelompok5.serverku.org/api/users/me", {
           headers: {
             Authorization: 'Bearer ' + authToken
           },
@@ -65,7 +65,7 @@ const TransferScreen: React.FC = () => {
 
     const fetchUsers = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/users/all", {
+        const response = await fetch("https://kelompok5.serverku.org/api/users/all", {
           headers: {
             Authorization: 'Bearer ' + authToken
           },

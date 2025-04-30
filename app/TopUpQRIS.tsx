@@ -13,9 +13,40 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTopup } from "@/context/topupContext";
+import { useEffect,useState } from "react";
+import { useAuth } from "@/context/authContext";
 
 const TopUpQRISScreen = () => {
-  const { amount } = useTopup();
+  const { amount,setAmount } = useTopup();
+  const {authToken} = useAuth()
+  const [fetchedBalance, setFetchedBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+      const fetchUserData = async () => {
+        try {
+          const response = await fetch("https://kelompok5.serverku.org/api/users/me", {
+            headers: {
+              Authorization: 'Bearer ' + authToken
+            },
+          });
+          const json = await response.json();
+  
+          if (json.status === "success") {
+            const { balance } = json.data;
+            setFetchedBalance(balance);
+          } else {
+            Alert.alert("Error", "Gagal mengambil data user.");
+          }
+        } catch (error) {
+          Alert.alert("Error", "Terjadi kesalahan saat mengambil data user.");
+          console.error("Error fetching user data:", error);
+        }
+      };
+  
+      fetchUserData();
+    }, []);
+
+  
 
   const handleNext = () => {
     const numericAmount = parseFloat(amount.replace(/\D/g, ""));
@@ -43,11 +74,11 @@ const TopUpQRISScreen = () => {
           <Ionicons name="wallet" size={24} color="#A020F0" />
           <View style={{ marginLeft: 12 }}>
             <Text style={styles.balanceLabel}>Wally Balance</Text>
-            <Text style={styles.balanceAmount}>Rp1.000.000</Text>
+            <Text style={styles.balanceAmount}>{fetchedBalance !== null
+                  ? `Rp${fetchedBalance.toLocaleString("id-ID")}`
+                  : "Memuat..."}</Text>
           </View>
         </View>
-        <Text style={styles.maxBalance}>Maximum Balance Rp20.000.000</Text>
-
         <Text style={styles.label}>Choose Top Up Method</Text>
         <View style={styles.selectedMethodContainer}>
           <Text style={styles.selectedMethodText}>QRIS</Text>
@@ -58,15 +89,13 @@ const TopUpQRISScreen = () => {
           <Text style={styles.amountText}>
             Rp{parseInt(amount).toLocaleString("id-ID")}
           </Text>
-          <Text style={styles.minNote}>Minimum Rp10.000</Text>
         </View>
 
         <Text style={styles.infoText}>
-          Setelah menekan 'Next', QR Code akan ditampilkan. Silakan scan QR Code
-          tersebut menggunakan aplikasi pembayaran yang mendukung QRIS.
+        Mohon maaf, metode Top Up menggunakan QRIS saat ini masih dalam pengembangan dan belum dapat digunakan.
         </Text>
 
-        <TouchableOpacity style={styles.button} onPress={handleNext}>
+        <TouchableOpacity style={[styles.button, { opacity: 0.5 }]} onPress={handleNext} disabled>
           <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>
       </ScrollView>

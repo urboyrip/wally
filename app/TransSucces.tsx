@@ -32,8 +32,7 @@ const TransSuccessScreen = () => {
     senderName,
     resetTransferData,
   } = useTransfer();
-
-  const transactionId = generateTransactionId();
+  
   const transactionTime = getCurrentDateTime();
 
   const handleBackToHome = () => {

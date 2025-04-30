@@ -1,6 +1,6 @@
 // TopUpQRISConfirmScreen.tsx
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native"; // Import Image
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native"; 
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTopup } from "@/context/topupContext";
@@ -12,6 +12,8 @@ const TopUpQRISConfirmScreen = () => {
   const { amount } = useTopup();
   const [timeLeft, setTimeLeft] = useState(PAYMENT_TIMEOUT);
   let intervalId: NodeJS.Timeout | null = null;
+
+  
 
   useEffect(() => {
     intervalId = setInterval(() => {

@@ -25,6 +25,37 @@ const TopUpDebitScreen = () => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const { balance } = useLocalSearchParams();
 
+  const handleCvvChange = (text: string) => {
+    const numericText = text.replace(/[^0-9]/g, '');
+    if (numericText.length <= 3) {
+      setLocalCvv(numericText);
+    }
+  };
+
+  const handleExpiryChange = (text: string) => {
+    const numericText = text.replace(/[^0-9]/g, '');
+    if (numericText.length <= 4) {
+      let formattedText = numericText;
+      if (numericText.length > 2) {
+        formattedText = `${numericText.slice(0, 2)}/${numericText.slice(2)}`;
+      }
+      setLocalExpiry(formattedText);
+    }
+  };
+
+  const handleCardNumberChange = (text: string) => {
+    const numericText = text.replace(/[^0-9]/g, '');
+    if (numericText.length <= 16) {
+      let formattedText = '';
+      for (let i = 0; i < numericText.length; i++) {
+        formattedText += numericText[i];
+        if ((i + 1) % 4 === 0 && i !== numericText.length - 1) {
+          formattedText += '-';
+        }
+      }
+      setLocalCardNumber(formattedText);
+    }
+  }
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -102,7 +133,6 @@ const TopUpDebitScreen = () => {
               </Text>
             </View>
           </View>
-          <Text style={styles.maxBalance}>Maximum Balance Rp20.000.000</Text>
 
           <Text style={styles.label}>Choose Top Up Method</Text>
           <View style={styles.selectedMethodContainer}>
@@ -114,7 +144,6 @@ const TopUpDebitScreen = () => {
             <Text style={styles.amountText}>
               Rp{parseInt(amount).toLocaleString("id-ID")}
             </Text>
-            <Text style={styles.minNote}>Minimum Rp10.000</Text>
           </View>
 
           <Text style={styles.label}>Card Information</Text>
@@ -122,7 +151,7 @@ const TopUpDebitScreen = () => {
           <TextInput
             style={styles.input}
             value={localCardNumber}
-            onChangeText={setLocalCardNumber}
+            onChangeText={handleCardNumberChange}
             placeholder="XXXX-XXXX-XXXX-XXXX"
             keyboardType="number-pad"
           />
@@ -131,7 +160,7 @@ const TopUpDebitScreen = () => {
           <TextInput
             style={styles.input}
             value={localExpiry}
-            onChangeText={setLocalExpiry}
+            onChangeText={handleExpiryChange}
             placeholder="MM/YY"
             keyboardType="numbers-and-punctuation"
           />
@@ -140,9 +169,10 @@ const TopUpDebitScreen = () => {
           <TextInput
             style={styles.input}
             value={localCvv}
-            onChangeText={setLocalCvv}
+            onChangeText={handleCvvChange}
             placeholder="XXX"
             keyboardType="number-pad"
+            secureTextEntry
           />
 
           <View style={styles.bottomPadding} />
@@ -279,4 +309,5 @@ const styles = StyleSheet.create({
   bottomPadding: {
     height: 80,
   },
+  
 });

@@ -57,7 +57,7 @@ const TopupScreen = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/users/me", {
+        const response = await fetch("https://kelompok5.serverku.org/api/users/me", {
           headers: {
             Authorization: 'Bearer ' + authToken
           },
@@ -154,7 +154,6 @@ const TopupScreen = () => {
               </Text>
             </View>
           </View>
-          <Text style={styles.maxBalance}>Maximum Balance Rp20.000.000</Text>
 
           <Text style={styles.label}>Choose Top Up Method</Text>
           <TouchableOpacity
@@ -207,7 +206,6 @@ const TopupScreen = () => {
                 </Text>
               )}
             </View>
-            <Text style={styles.minNote}>Minimum Rp10.000</Text>
           </TouchableOpacity>
           <View style={{ height: 80 }} />
         </ScrollView>

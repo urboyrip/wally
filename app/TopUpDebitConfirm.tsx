@@ -14,7 +14,9 @@ const DebitCardConfirmationScreen = () => {
 
   const handleConfirmTopup = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/topup", {
+     
+      
+      const response = await fetch("https://kelompok5.serverku.org/api/topup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -24,7 +26,7 @@ const DebitCardConfirmationScreen = () => {
           accountnum: accountNumber,
           amount: parseInt(amount),
           method: "Debit",
-          cardNumber: cardNumber,
+          cardNumber: cardNumber.replace(/[^0-9]/g, ''),
           cvv: cvv,
           expirationDate: expiry,
         }),

@@ -7,11 +7,10 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <TransferProvider>
-      <TopupProvider>
-        <Stack screenOptions={{ headerShown: false }} />
-      </TopupProvider>
-    </TransferProvider>
+        <TopupProvider>
+          <Stack screenOptions={{ headerShown: false }} />
+        </TopupProvider>
+      </TransferProvider>
     </AuthProvider>
-    
   );
 }

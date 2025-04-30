@@ -14,7 +14,8 @@ const CreditCardConfirmationScreen = () => {
 
   const handleConfirmTopup = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/topup", {
+      console.log(expiry);
+      const response = await fetch("https://kelompok5.serverku.org/api/topup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -24,12 +25,12 @@ const CreditCardConfirmationScreen = () => {
           accountnum: accountNumber,
           amount: parseInt(amount),
           method: "Credit",
-          cardNumber: cardNumber,
+          cardNumber: cardNumber.replace(/[^0-9]/g, ''),
           cvv: cvv,
           expirationDate: expiry,
         }),
       });
-
+      
       const json = await response.json();
 
       if (response.ok && json.status === "success") {

@@ -47,11 +47,11 @@ export default function Index() {
   const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
   const API_SUMMARY_THIS_MONTH =
-    "http://localhost:8080/api/transactions/summary/this_month";
+    "https://kelompok5.serverku.org/api/transactions/summary/this_month";
   const API_SUMMARY_LAST_MONTH =
-    "http://localhost:8080/api/transactions/summary/last_month";
+    "https://kelompok5.serverku.org/api/transactions/summary/last_month";
   const API_SUMMARY_LAST_3_MONTHS =
-    "http://localhost:8080/api/transactions/summary/three_month_ago";
+    "https://kelompok5.serverku.org/api/transactions/summary/three_month_ago";
 
   const fetchSummaryThisMonth = async () => {
     try {
@@ -171,7 +171,7 @@ export default function Index() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userResponse = await fetch("http://localhost:8080/api/users/me", {
+        const userResponse = await fetch("https://kelompok5.serverku.org/api/users/me", {
           method: "GET",
           headers: {
             Authorization: "Bearer " + authToken,
@@ -236,10 +236,10 @@ export default function Index() {
           <View style={{ paddingHorizontal: 15, marginTop: 15 }}>
             <Text style={{ color: "#3A1D6E", fontWeight: "600", fontSize: 25 }}>
               {" "}
-              Welcome, {dataUser?.fullname?.split(" ")[0] || "User"}!
+              Assalamualaikum, {dataUser?.fullname?.split(" ")[0] || "User"}!
             </Text>
             <Text style={{ color: "black", fontWeight: "100", fontSize: 15 }}>
-              Your wallet’s all set and secure. Let’s get started.
+              Your wallet’s all set and secure. Bismillah let’s get started.
             </Text>
           </View>
 
